@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Círculo de Quintas Interactivo (Sin API)</title>
+    <title>Círculo de Quintas Interactivo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Variables CSS para tamaños y dimensiones, facilitando la responsividad */
@@ -24,7 +24,7 @@
             align-items: center;
             min-height: 100vh;
             background-color: #f0f0f0;
-            overflow: hidden;
+            /* Eliminamos overflow: hidden para permitir el scroll si el contenido es demasiado grande */
             padding: 1rem;
         }
 
@@ -40,6 +40,8 @@
             max-height: 90vw;
             background-color: #ffffff;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            /* Transición para la rotación del círculo */
+            transition: transform 0.8s ease-in-out;
         }
 
         .outer-circle, .inner-circle {
@@ -160,6 +162,20 @@
                 height: var(--circle-center-size);
                 font-size: 1.5em;
             }
+
+            /* Estilos para los botones en móvil */
+            .flex-col.sm\:flex-row {
+                flex-direction: row; /* Mantener en fila */
+                flex-wrap: wrap; /* Permitir que los botones se envuelvan */
+                justify-content: center; /* Centrar los botones envueltos */
+                gap: 0.5rem; /* Espacio reducido entre botones */
+            }
+            .flex-col.sm\:flex-row button {
+                padding: 0.75rem 1rem; /* Padding más pequeño */
+                font-size: 0.8rem; /* Fuente más pequeña */
+                flex-grow: 1; /* Permite que los botones crezcan para llenar el espacio */
+                min-width: 150px; /* Ancho mínimo para evitar que sean demasiado pequeños */
+            }
         }
 
         .modal {
@@ -203,7 +219,7 @@
             cursor: pointer;
         }
 
-        .loading-spinner { /* No se usará, pero lo dejo por si acaso */
+        .loading-spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #ffaa00;
             border-radius: 50%;
@@ -221,7 +237,7 @@
     </style>
 </head>
 <body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
-    <h1 class="text-3xl font-bold mb-8 text-gray-800">Círculo de Quintas Interactivo</h1>
+    <h1 class="text-3xl font-bold mb-8 text-gray-800 text-center">Círculo de Quintas Interactivo</h1>
 
     <div id="circle-of-fifths-container" class="relative flex items-center justify-center bg-white rounded-full shadow-lg">
         <div class="outer-circle">
@@ -259,18 +275,12 @@
         </div>
     </div>
 
-    <div class="flex flex-col sm:flex-row gap-4 mt-8">
+    <div class="flex flex-row flex-wrap justify-center gap-4 mt-8">
         <button id="generateProgressionBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
             Generar Progresión de Acordes
         </button>
-        <button id="explainKeyBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
-            Explicar Tonalidad
-        </button>
         <button id="suggestSubstitutionsBtn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
             Sugerir Sustituciones de Acordes
-        </button>
-        <button id="generateSongIdeasBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
-            Generar Ideas para Canciones
         </button>
     </div>
 
@@ -286,8 +296,6 @@
 
     <script>
         // Define las relaciones entre las tonalidades mayores y sus acordes diatónicos (mayores y menores)
-        // y la tonalidad menor relativa.
-        // Se definen fuera del DOMContentLoaded para asegurar su disponibilidad global en el script.
         const tonalidades = {
             'C': { major: ['C', 'F', 'G'], minor: ['Am', 'Dm', 'Em'] },
             'G': { major: ['G', 'C', 'D'], minor: ['Em', 'Am', 'Bm'] },
@@ -309,36 +317,291 @@
             'Ebm': 'F#', 'Bbm': 'Db', 'Fm': 'Ab', 'Cm': 'Eb', 'Gm': 'Bb', 'Dm': 'F',
         };
 
-        // --- Datos predefinidos para las respuestas ---
-        // Se definen fuera del DOMContentLoaded para asegurar su disponibilidad global en el script.
+        // Mapeo de notas a la rotación necesaria para alinearlas en la parte superior (posición de C)
+        const noteAlignmentRotation = {
+            'C': 0,
+            'G': -30,
+            'D': -60,
+            'A': -90,
+            'E': -120,
+            'B': -150,
+            'F#': -180,
+            'Db': -210,
+            'Ab': -240,
+            'Eb': -270,
+            'Bb': -300,
+            'F': -330, // O +30
+            // Para las menores, se alinean con su relativa mayor
+            'Am': 0,
+            'Em': -30,
+            'Bm': -60,
+            'F#m': -90,
+            'C#m': -120,
+            'G#m': -150,
+            'Ebm': -180,
+            'Bbm': -210,
+            'Fm': -240,
+            'Cm': -270,
+            'Gm': -300,
+            'Dm': -330,
+        };
+
+        // --- Datos predefinidos para las respuestas con alternativas aleatorias ---
         const predefinedResponses = {
             "C": {
-                "progression": "Una progresión clásica en Do Mayor es **C - G - Am - F** (I - V - vi - IV). Transmite un sentimiento alegre y familiar.",
-                "explanation": "La tonalidad de Do Mayor (C) no tiene sostenidos ni bemoles en su armadura de clave. Sus acordes principales son C (Do Mayor), F (Fa Mayor) y G (Sol Mayor). Es una tonalidad brillante y muy común.",
-                "substitutions": "Para C mayor: Gsus4 puede sustituir a G. Am7 para C. Cmaj7 para un sonido más suave.",
-                "songIdeas": "1. Una balada alegre sobre el primer amor. 2. Una canción infantil con un coro pegadizo. 3. Un himno de gratitud y esperanza."
+                "progression": [
+                    "Una progresión clásica en Do Mayor es **C - G - Am - F** (I - V - vi - IV). Transmite un sentimiento alegre y familiar.",
+                    "Otra opción en Do Mayor es **C - F - C - G** (I - IV - I - V). Simple y efectiva, muy usada en pop.",
+                    "Para un toque más moderno en Do Mayor: **Am - G - C - F** (vi - V - I - IV). Ideal para baladas.",
+                    "Una progresión bluesy en Do Mayor: **C7 - F7 - G7 - C7** (I7 - IV7 - V7 - I7).",
+                    "Progresión jazzy en Do Mayor: **Dm7 - G7 - Cmaj7 - Fmaj7** (ii7 - V7 - Imaj7 - IVmaj7)."
+                ],
+                "substitutions": [
+                    "Para C mayor: Gsus4 puede sustituir a G. Am7 para C. Cmaj7 para un sonido más suave.",
+                    "Sustituciones comunes en C mayor: Em7 por G, Dm7 por F, o Fmaj7 por C para un color diferente.",
+                    "Prueba la sustitución del tritono: Db7 por G7 en C mayor para una resolución inesperada.",
+                    "Para C, puedes usar un Em7b5 como sustitución de Am para un sonido más oscuro."
+                ]
             },
             "G": {
-                "progression": "Una progresión popular en Sol Mayor es **G - D - Em - C** (I - V - vi - IV). Es una progresión muy usada en folk y rock.",
-                "explanation": "La tonalidad de Sol Mayor (G) tiene un sostenido (F#) en su armadura de clave. Sus acordes principales son G (Sol Mayor), C (Do Mayor) y D (Re Mayor). Es una tonalidad cálida y versátil.",
-                "substitutions": "Para G mayor: Cadd9 puede sustituir a C. Dsus4 a D. Bm7 para Em.",
-                "songIdeas": "1. Un tema aventurero sobre un viaje por carretera. 2. Una canción campestre sobre la naturaleza. 3. Un himno optimista de superación."
+                "progression": [
+                    "Una progresión popular en Sol Mayor es **G - D - Em - C** (I - V - vi - IV). Es una progresión muy usada en folk y rock.",
+                    "Otra progresión en Sol Mayor: **G - C - G - D** (I - IV - I - V). Fundamental y sólida.",
+                    "Para un sonido más enérgico en Sol Mayor: **Em - C - G - D** (vi - IV - I - V).",
+                    "Progresión blues en Sol Mayor: **G7 - C7 - D7 - G7** (I7 - IV7 - V7 - I7).",
+                    "Progresión jazzy en Sol Mayor: **Am7 - D7 - Gmaj7 - Cmaj7** (ii7 - V7 - Imaj7 - IVmaj7)."
+                ],
+                "substitutions": [
+                    "Para G mayor: Cadd9 puede sustituir a C. Dsus4 a D. Bm7 para Em.",
+                    "Sustituciones comunes en G mayor: F#dim7 por D7, o Gmaj7 por G para un sonido más rico.",
+                    "Prueba la sustitución del tritono: Eb7 por D7 en G mayor.",
+                    "Para G, puedes usar un C#dim7 como sustitución de Em para un sonido más tenso."
+                ]
             },
             "Am": {
-                "progression": "Una progresión común en La Menor es **Am - G - C - F** (i - VII - III - VI). Tiene un sentimiento melancólico pero con resolución.",
-                "explanation": "La tonalidad de La Menor (Am) es la relativa menor de Do Mayor. No tiene sostenidos ni bemoles. Sus acordes principales son Am (La Menor), Dm (Re Menor) y Em (Mi Menor) o E Mayor (V armónico).",
-                "substitutions": "Para Am menor: Dsus2 puede sustituir a Dm. Em7 para Am. Gmaj7 para un sonido más sofisticado.",
-                "songIdeas": "1. Una historia de desamor en la noche. 2. Un cuento gótico sobre un viejo misterio. 3. Un lamento por tiempos perdidos."
+                "progression": [
+                    "Una progresión común en La Menor es **Am - G - C - F** (i - VII - III - VI). Tiene un sentimiento melancólico pero con resolución.",
+                    "Otra progresión en La Menor: **Am - Dm - G - C** (i - iv - VII - III). Clásica y versátil.",
+                    "Para un sonido más dramático en La Menor: **Am - Em - F - C** (i - v - VI - III).",
+                    "Progresión blues en La Menor: **Am7 - Dm7 - Em7 - Am7** (i7 - iv7 - v7 - i7).",
+                    "Progresión jazzy en La Menor: **Bm7b5 - E7 - Am7 - Dm7** (ii7b5 - V7 - i7 - iv7)."
+                ],
+                "substitutions": [
+                    "Para Am menor: Dsus2 puede sustituir a Dm. Em7 para Am. Gmaj7 para un sonido más sofisticado.",
+                    "Sustituciones comunes en Am menor: Cmaj7 por Am, o Fmaj7 por Dm para un sonido más suave.",
+                    "Puedes usar un E7alt (alterado) por E7 para una resolución más fuerte en Am.",
+                    "Para Am, puedes usar un Cdim7 como sustitución de G para un sonido más oscuro."
+                ]
             },
-            // --- Puedes añadir más notas y sus respuestas aquí ---
+            // Puedes añadir más notas y sus respuestas aquí siguiendo el mismo formato
+            "D": {
+                "progression": [
+                    "Una progresión común en Re Mayor es **D - G - A - D** (I - IV - V - I). Sencilla y efectiva.",
+                    "Otra en Re Mayor: **Bm - G - D - A** (vi - IV - I - V). Muy popular en pop y rock.",
+                ],
+                "substitutions": [
+                    "Para D mayor: Gsus2 por G. A7sus4 por A. F#m7 por D.",
+                    "Sustituciones en D mayor: Em7 por A, Gmaj7 por D."
+                ]
+            },
+            "Dm": {
+                "progression": [
+                    "Una progresión en Re Menor es **Dm - Gm - Am - Dm** (i - iv - v - i). Típica de la música clásica y folk.",
+                    "Otra en Re Menor: **Dm - Bb - C - F** (i - VI - VII - III). Sonido más moderno.",
+                ],
+                "substitutions": [
+                    "Para Dm menor: Gm7 por Dm. Cmaj7 por F. A7alt por Am.",
+                    "Sustituciones en Dm menor: Em7b5 por Am, Fmaj7 por Dm."
+                ]
+            },
+            "E": {
+                "progression": [
+                    "Una progresión en Mi Mayor es **E - A - B - E** (I - IV - V - I). Muy común en blues y rock.",
+                    "Otra en Mi Mayor: **C#m - A - E - B** (vi - IV - I - V).",
+                ],
+                "substitutions": [
+                    "Para E mayor: Asus2 por A. Bsus4 por B. G#m7 por E.",
+                    "Sustituciones en E mayor: F#m7 por B, Amaj7 por E."
+                ]
+            },
+            "Em": {
+                "progression": [
+                    "Una progresión en Mi Menor es **Em - Am - Bm - Em** (i - iv - v - i). Sonido melancólico.",
+                    "Otra en Mi Menor: **Em - C - G - D** (i - VI - III - VII). Muy popular.",
+                ],
+                "substitutions": [
+                    "Para Em menor: Am7 por Em. Dmaj7 por G. B7alt por Bm.",
+                    "Sustituciones en Em menor: F#m7b5 por Bm, Gmaj7 por Em."
+                ]
+            },
+            "A": {
+                "progression": [
+                    "Una progresión en La Mayor es **A - D - E - A** (I - IV - V - I). Clásica y versátil.",
+                    "Otra en La Mayor: **F#m - D - A - E** (vi - IV - I - V).",
+                ],
+                "substitutions": [
+                    "Para A mayor: Dsus2 por D. Esus4 por E. C#m7 por A.",
+                    "Sustituciones en A mayor: Bm7 por E, Dmaj7 por A."
+                ]
+            },
+            "B": {
+                "progression": [
+                    "Una progresión en Si Mayor es **B - E - F# - B** (I - IV - V - I).",
+                    "Otra en Si Mayor: **G#m - E - B - F#** (vi - IV - I - V).",
+                ],
+                "substitutions": [
+                    "Para B mayor: Esus2 por E. F#sus4 por F#. D#m7 por B.",
+                    "Sustituciones en B mayor: C#m7 por F#, Emaj7 por B."
+                ]
+            },
+            "F#": {
+                "progression": [
+                    "Una progresión en Fa# Mayor es **F# - B - C# - F#** (I - IV - V - I).",
+                    "Otra en Fa# Mayor: **D#m - B - F# - C#** (vi - IV - I - V).",
+                ],
+                "substitutions": [
+                    "Para F# mayor: Bsus2 por B. C#sus4 por C#. A#m7 por F#.",
+                    "Sustituciones en F# mayor: G#m7 por C#, Bmaj7 por F#."
+                ]
+            },
+            "Db": {
+                "progression": [
+                    "Una progresión en Re bemol Mayor es **Db - Gb - Ab - Db** (I - IV - V - I).",
+                    "Otra en Re bemol Mayor: **Bbm - Gb - Db - Ab** (vi - IV - I - V).",
+                ],
+                "substitutions": [
+                    "Para Db mayor: Gbsus2 por Gb. Absus4 por Ab. Fm7 por Db.",
+                    "Sustituciones en Db mayor: Ebm7 por Ab, Gbmaj7 por Db."
+                ]
+            },
+            "Ab": {
+                "progression": [
+                    "Una progresión en La bemol Mayor es **Ab - Db - Eb - Ab** (I - IV - V - I).",
+                    "Otra en La bemol Mayor: **Fm - Db - Ab - Eb** (vi - IV - I - V).",
+                ],
+                "substitutions": [
+                    "Para Ab mayor: Dbsus2 por Db. Ebsus4 por Eb. Cm7 por Ab.",
+                    "Sustituciones en Ab mayor: Bbm7 por Eb, Dbmaj7 por Ab."
+                ]
+            },
+            "Eb": {
+                "progression": [
+                    "Una progresión en Mi bemol Mayor es **Eb - Ab - Bb - Eb** (I - IV - V - I).",
+                    "Otra en Mi bemol Mayor: **Cm - Ab - Eb - Bb** (vi - IV - I - V).",
+                ],
+                "substitutions": [
+                    "Para Eb mayor: Absus2 por Ab. Bbsus4 por Bb. Gm7 por Eb.",
+                    "Sustituciones en Eb mayor: Fm7 por Bb, Abmaj7 por Eb."
+                ]
+            },
+            "Bb": {
+                "progression": [
+                    "Una progresión en Si bemol Mayor es **Bb - Eb - F - Bb** (I - IV - V - I).",
+                    "Otra en Si bemol Mayor: **Gm - Eb - Bb - F** (vi - IV - I - V).",
+                ],
+                "substitutions": [
+                    "Para Bb mayor: Ebsus2 por Eb. Fsus4 por F. Dm7 por Bb.",
+                    "Sustituciones en Bb mayor: Cm7 por F, Ebmaj7 por Bb."
+                ]
+            },
+            "F": {
+                "progression": [
+                    "Una progresión en Fa Mayor es **F - Bb - C - F** (I - IV - V - I). Muy común y fácil de tocar.",
+                    "Otra en Fa Mayor: **Dm - Bb - F - C** (vi - IV - I - V).",
+                ],
+                "substitutions": [
+                    "Para F mayor: Bbsus2 por Bb. Csus4 por C. Am7 por F.",
+                    "Sustituciones en F mayor: Gm7 por C, Bbmaj7 por F."
+                ]
+            },
+            "Ebm": {
+                "progression": [
+                    "Una progresión en Mi bemol Menor es **Ebm - Abm - Bbm - Ebm** (i - iv - v - i).",
+                    "Otra en Mi bemol Menor: **Ebm - Cb - Db - Gb** (i - VI - VII - III).",
+                ],
+                "substitutions": [
+                    "Para Ebm menor: Abm7 por Ebm. Bbm7 por Ebm.",
+                    "Sustituciones en Ebm menor: Fbm7b5 por Bbm, Gbmaj7 por Ebm."
+                ]
+            },
+            "Bbm": {
+                "progression": [
+                    "Una progresión en Si bemol Menor es **Bbm - Ebm - Fm - Bbm** (i - iv - v - i).",
+                    "Otra en Si bemol Menor: **Bbm - Gb - Ab - Db** (i - VI - VII - III).",
+                ],
+                "substitutions": [
+                    "Para Bbm menor: Ebm7 por Bbm. Fm7 por Bbm.",
+                    "Sustituciones en Bbm menor: Cm7b5 por Fm, Dbmaj7 por Bbm."
+                ]
+            },
+            "Fm": {
+                "progression": [
+                    "Una progresión en Fa Menor es **Fm - Bbm - Cm - Fm** (i - iv - v - i).",
+                    "Otra en Fa Menor: **Fm - Db - Eb - Ab** (i - VI - VII - III).",
+                ],
+                "substitutions": [
+                    "Para Fm menor: Bbm7 por Fm. Cm7 por Fm.",
+                    "Sustituciones en Fm menor: Gm7b5 por Cm, Abmaj7 por Fm."
+                ]
+            },
+            "Cm": {
+                "progression": [
+                    "Una progresión en Do Menor es **Cm - Fm - Gm - Cm** (i - iv - v - i).",
+                    "Otra en Do Menor: **Cm - Ab - Bb - Eb** (i - VI - VII - III).",
+                ],
+                "substitutions": [
+                    "Para Cm menor: Fm7 por Cm. Gm7 por Cm.",
+                    "Sustituciones en Cm menor: Dm7b5 por Gm, Ebmaj7 por Cm."
+                ]
+            },
+            "Gm": {
+                "progression": [
+                    "Una progresión en Sol Menor es **Gm - Cm - Dm - Gm** (i - iv - v - i).",
+                    "Otra en Sol Menor: **Gm - Eb - F - Bb** (i - VI - VII - III).",
+                ],
+                "substitutions": [
+                    "Para Gm menor: Cm7 por Gm. Dm7 por Gm.",
+                    "Sustituciones en Gm menor: Am7b5 por Dm, Bbmaj7 por Gm."
+                ]
+            },
+            "Dm": {
+                "progression": [
+                    "Una progresión en Re Menor es **Dm - Gm - Am - Dm** (i - iv - v - i).",
+                    "Otra en Re Menor: **Dm - Bb - C - F** (i - VI - VII - III).",
+                ],
+                "substitutions": [
+                    "Para Dm menor: Gm7 por Dm. Am7 por Dm.",
+                    "Sustituciones en Dm menor: Em7b5 por Am, Fmaj7 por Dm."
+                ]
+            },
+            "C#m": {
+                "progression": [
+                    "Una progresión en Do# Menor es **C#m - F#m - G#m - C#m** (i - iv - v - i).",
+                    "Otra en Do# Menor: **C#m - A - B - E** (i - VI - VII - III).",
+                ],
+                "substitutions": [
+                    "Para C#m menor: F#m7 por C#m. G#m7 por C#m.",
+                    "Sustituciones en C#m menor: D#m7b5 por G#m, Emaj7 por C#m."
+                ]
+            },
+            "G#m": {
+                "progression": [
+                    "Una progresión en Sol# Menor es **G#m - C#m - D#m - G#m** (i - iv - v - i).",
+                    "Otra en Sol# Menor: **G#m - E - F# - B** (i - VI - VII - III).",
+                ],
+                "substitutions": [
+                    "Para G#m menor: C#m7 por G#m. D#m7 por G#m.",
+                    "Sustituciones en G#m menor: A#m7b5 por D#m, Bmaj7 por G#m."
+                ]
+            },
+            // Asegúrate de añadir entradas para todas las notas si quieres que todas tengan respuestas predefinidas.
         };
 
         document.addEventListener('DOMContentLoaded', () => {
             const noteSegments = document.querySelectorAll('.note-segment');
             const generateProgressionBtn = document.getElementById('generateProgressionBtn');
-            const explainKeyBtn = document.getElementById('explainKeyBtn');
-            const suggestSubstitutionsBtn = document.getElementById('suggestSubstitutionsBtn');
-            const generateSongIdeasBtn = document.getElementById('generateSongIdeasBtn');
+            const suggestSubstitutionsBtn = document.getElementById('suggestSubstitutionsBtn'); // Solo este botón
+            const circleContainer = document.getElementById('circle-of-fifths-container'); // Para la rotación
             const llmResponseModal = document.getElementById('llmResponseModal');
             const closeButton = document.querySelector('.close-button');
             const modalTitle = document.getElementById('modalTitle');
@@ -349,12 +612,13 @@
             // Función para obtener y mostrar la respuesta predefinida
             function getPredefinedResponse(note, type) {
                 if (predefinedResponses[note] && predefinedResponses[note][type]) {
+                    const responsesArray = predefinedResponses[note][type];
+                    const randomIndex = Math.floor(Math.random() * responsesArray.length);
+                    const selectedResponse = responsesArray[randomIndex];
+
                     showModal(
-                        `${type === 'progression' ? 'Progresión de Acordes' :
-                           type === 'explanation' ? 'Explicación de la Tonalidad' :
-                           type === 'substitutions' ? 'Sugerencias de Sustituciones' :
-                           'Ideas para Canciones'} para ${note}`,
-                        predefinedResponses[note][type]
+                        `${type === 'progression' ? 'Progresión de Acordes' : 'Sugerencias de Sustituciones'} para ${note}`,
+                        selectedResponse
                     );
                 } else {
                     showModal("Información no disponible", `No hay información predefinida para ${type} en la tonalidad de ${note}.`);
@@ -387,6 +651,7 @@
                     const selectedNote = segment.dataset.note;
                     currentSelectedNote = selectedNote;
 
+                    // Limpiar resaltado anterior
                     noteSegments.forEach(s => s.classList.remove('highlighted'));
 
                     let notesToHighlight = new Set();
@@ -412,6 +677,12 @@
                             }
                         });
                     }
+
+                    // Rotar el círculo para alinear la nota seleccionada
+                    const targetRotation = noteAlignmentRotation[selectedNote];
+                    if (targetRotation !== undefined) {
+                        circleContainer.style.transform = `rotate(${targetRotation}deg)`;
+                    }
                 });
             });
 
@@ -424,27 +695,11 @@
                 }
             });
 
-            explainKeyBtn.addEventListener('click', () => {
-                if (currentSelectedNote) {
-                    getPredefinedResponse(currentSelectedNote, 'explanation');
-                } else {
-                    showModal("Error", "Por favor, selecciona una nota en el círculo para obtener una explicación.");
-                }
-            });
-
             suggestSubstitutionsBtn.addEventListener('click', () => {
                 if (currentSelectedNote) {
                     getPredefinedResponse(currentSelectedNote, 'substitutions');
                 } else {
                     showModal("Error", "Por favor, selecciona una nota en el círculo para obtener sugerencias de sustituciones.");
-                }
-            });
-
-            generateSongIdeasBtn.addEventListener('click', () => {
-                if (currentSelectedNote) {
-                    getPredefinedResponse(currentSelectedNote, 'songIdeas');
-                } else {
-                    showModal("Error", "Por favor, selecciona una nota en el círculo para generar ideas para canciones.");
                 }
             });
         });
