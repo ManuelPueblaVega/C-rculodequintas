@@ -14,7 +14,55 @@
             --inner-segment-width: 80px;
             --inner-segment-height: 40px;
             --circle-center-size: 100px;
+            /* Variables de tema por defecto (claro) */
+            --bg-color: #f0f0f0;
+            --text-color: #333;
+            --circle-bg: #ffffff;
+            --circle-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            --segment-bg: #fff;
+            --segment-border: #ccc;
+            --segment-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --highlight-bg: #ffaa00;
+            --highlight-text: white;
+            --highlight-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            --center-bg: #eee;
+            --center-color: #666;
+            --center-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
+
+        /* Definición de temas */
+        .theme-dark {
+            --bg-color: #2c3e50; /* Azul oscuro */
+            --text-color: #ecf0f1; /* Gris claro */
+            --circle-bg: #34495e; /* Azul más oscuro */
+            --circle-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            --segment-bg: #4a6572; /* Gris azulado */
+            --segment-border: #607d8b;
+            --segment-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            --highlight-bg: #e67e22; /* Naranja más oscuro */
+            --highlight-text: white;
+            --highlight-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            --center-bg: #5a7582;
+            --center-color: #ecf0f1;
+            --center-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .theme-vibrant {
+            --bg-color: #e0f2f7; /* Azul claro */
+            --text-color: #2c3e50;
+            --circle-bg: #bbdefb; /* Azul pastel */
+            --circle-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            --segment-bg: #90caf9; /* Azul medio */
+            --segment-border: #64b5f6;
+            --segment-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            --highlight-bg: #ff5722; /* Naranja brillante */
+            --highlight-text: white;
+            --highlight-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            --center-bg: #e3f2fd;
+            --center-color: #42a5f5;
+            --center-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
 
         body {
             font-family: 'Inter', sans-serif;
@@ -23,9 +71,10 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #f0f0f0;
-            /* Eliminamos overflow: hidden para permitir el scroll si el contenido es demasiado grande */
+            background-color: var(--bg-color); /* Usar variable de tema */
+            color: var(--text-color); /* Usar variable de tema */
             padding: 1rem;
+            transition: background-color 0.5s ease, color 0.5s ease; /* Transición suave para el cambio de tema */
         }
 
         #circle-of-fifths-container {
@@ -38,10 +87,9 @@
             align-items: center;
             max-width: 90vw;
             max-height: 90vw;
-            background-color: #ffffff;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            /* Transición para la rotación del círculo */
-            transition: transform 0.8s ease-in-out;
+            background-color: var(--circle-bg); /* Usar variable de tema */
+            box-shadow: var(--circle-shadow); /* Usar variable de tema */
+            transition: transform 0.8s ease-in-out, background-color 0.5s ease, box-shadow 0.5s ease;
         }
 
         .outer-circle, .inner-circle {
@@ -68,12 +116,12 @@
             align-items: center;
             font-weight: bold;
             cursor: pointer;
-            background-color: #fff;
-            border: 1px solid #ccc;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            background-color: var(--segment-bg); /* Usar variable de tema */
+            border: 1px solid var(--segment-border); /* Usar variable de tema */
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
             border-radius: 0.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            color: #333;
+            box-shadow: var(--segment-shadow); /* Usar variable de tema */
+            color: var(--text-color); /* Usar variable de tema */
             font-size: 1.1rem;
         }
 
@@ -103,24 +151,34 @@
         .outer-circle .note-segment:nth-child(12), .inner-circle .note-segment:nth-child(12) { --rotation-deg: 330deg; }
 
         .note-segment.highlighted {
-            background-color: #ffaa00;
-            color: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            background-color: var(--highlight-bg); /* Usar variable de tema */
+            color: var(--highlight-text); /* Usar variable de tema */
+            box-shadow: var(--highlight-shadow); /* Usar variable de tema */
         }
 
         .circle-center {
             position: absolute;
             width: var(--circle-center-size);
             height: var(--circle-center-size);
-            background-color: #eee;
+            background-color: var(--center-bg); /* Usar variable de tema */
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 2em;
-            color: #666;
+            color: var(--center-color); /* Usar variable de tema */
             z-index: 10;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: var(--center-shadow); /* Usar variable de tema */
+        }
+
+        /* Estilo para mostrar la escala */
+        #scale-display {
+            margin-top: 2rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-color); /* Usar variable de tema */
+            text-align: center;
+            min-height: 2em; /* Para evitar saltos de diseño */
         }
 
         @media (max-width: 768px) {
@@ -164,17 +222,21 @@
             }
 
             /* Estilos para los botones en móvil */
-            .flex-col.sm\:flex-row {
-                flex-direction: row; /* Mantener en fila */
-                flex-wrap: wrap; /* Permitir que los botones se envuelvan */
-                justify-content: center; /* Centrar los botones envueltos */
-                gap: 0.5rem; /* Espacio reducido entre botones */
+            .flex-row.flex-wrap { /* Ya no es sm:flex-row, es directamente flex-row */
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.5rem;
             }
-            .flex-col.sm\:flex-row button {
-                padding: 0.75rem 1rem; /* Padding más pequeño */
-                font-size: 0.8rem; /* Fuente más pequeña */
-                flex-grow: 1; /* Permite que los botones crezcan para llenar el espacio */
-                min-width: 150px; /* Ancho mínimo para evitar que sean demasiado pequeños */
+            .flex-row.flex-wrap button {
+                padding: 0.75rem 1rem;
+                font-size: 0.8rem;
+                flex-grow: 1;
+                min-width: 150px;
+            }
+
+            #scale-display {
+                font-size: 1rem;
             }
         }
 
@@ -193,19 +255,20 @@
         }
 
         .modal-content {
-            background-color: #fefefe;
+            background-color: var(--segment-bg); /* Usar variable de tema */
             margin: auto;
             padding: 20px;
-            border: 1px solid #888;
+            border: 1px solid var(--segment-border);
             width: 80%;
             max-width: 500px;
             border-radius: 0.75rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: var(--circle-shadow); /* Reutilizar sombra del círculo */
             position: relative;
+            color: var(--text-color); /* Usar variable de tema */
         }
 
         .close-button {
-            color: #aaa;
+            color: var(--center-color); /* Usar variable de tema */
             float: right;
             font-size: 28px;
             font-weight: bold;
@@ -214,25 +277,9 @@
 
         .close-button:hover,
         .close-button:focus {
-            color: #000;
+            color: var(--highlight-bg);
             text-decoration: none;
             cursor: pointer;
-        }
-
-        .loading-spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #ffaa00;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-            display: none;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -282,7 +329,13 @@
         <button id="suggestSubstitutionsBtn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
             Sugerir Sustituciones de Acordes
         </button>
+        <button id="changeThemeBtn" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+            Cambiar Tema
+        </button>
     </div>
+
+    <div id="scale-display" class="mt-8 text-lg font-semibold text-gray-700">
+        </div>
 
     <div id="llmResponseModal" class="modal">
         <div class="modal-content">
@@ -293,6 +346,10 @@
             </div>
         </div>
     </div>
+
+    <footer class="mt-12 text-sm text-gray-600">
+        Creado por Manuel Puebla Vega
+    </footer>
 
     <script>
         // Define las relaciones entre las tonalidades mayores y sus acordes diatónicos (mayores y menores)
@@ -344,6 +401,34 @@
             'Cm': -270,
             'Gm': -300,
             'Dm': -330,
+        };
+
+        // --- Datos de escalas para cada tonalidad (natural menor para las menores) ---
+        const scales = {
+            'C': ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+            'G': ['G', 'A', 'B', 'C', 'D', 'E', 'F#'],
+            'D': ['D', 'E', 'F#', 'G', 'A', 'B', 'C#'],
+            'A': ['A', 'B', 'C#', 'D', 'E', 'F#', 'G#'],
+            'E': ['E', 'F#', 'G#', 'A', 'B', 'C#', 'D#'],
+            'B': ['B', 'C#', 'D#', 'E', 'F#', 'G#', 'A#'],
+            'F#': ['F#', 'G#', 'A#', 'B', 'C#', 'D#', 'E# (F)'],
+            'Db': ['Db', 'Eb', 'F', 'Gb', 'Ab', 'Bb', 'C'],
+            'Ab': ['Ab', 'Bb', 'C', 'Db', 'Eb', 'F', 'G'],
+            'Eb': ['Eb', 'F', 'G', 'Ab', 'Bb', 'C', 'D'],
+            'Bb': ['Bb', 'C', 'D', 'Eb', 'F', 'G', 'A'],
+            'F': ['F', 'G', 'A', 'Bb', 'C', 'D', 'E'],
+            'Am': ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
+            'Em': ['E', 'F#', 'G', 'A', 'B', 'C', 'D'],
+            'Bm': ['B', 'C#', 'D', 'E', 'F#', 'G', 'A'],
+            'F#m': ['F#', 'G#', 'A', 'B', 'C#', 'D', 'E'],
+            'C#m': ['C#', 'D#', 'E', 'F#', 'G#', 'A', 'B'],
+            'G#m': ['G#', 'A#', 'B', 'C#', 'D#', 'E', 'F#'],
+            'Ebm': ['Eb', 'F', 'Gb', 'Ab', 'Bb', 'Cb (B)', 'Db'],
+            'Bbm': ['Bb', 'C', 'Db', 'Eb', 'F', 'Gb', 'Ab'],
+            'Fm': ['F', 'G', 'Ab', 'Bb', 'C', 'Db', 'Eb'],
+            'Cm': ['C', 'D', 'Eb', 'F', 'G', 'Ab', 'Bb'],
+            'Gm': ['G', 'A', 'Bb', 'C', 'D', 'Eb', 'F'],
+            'Dm': ['D', 'E', 'F', 'G', 'A', 'Bb', 'C'],
         };
 
         // --- Datos predefinidos para las respuestas con alternativas aleatorias ---
@@ -600,14 +685,22 @@
         document.addEventListener('DOMContentLoaded', () => {
             const noteSegments = document.querySelectorAll('.note-segment');
             const generateProgressionBtn = document.getElementById('generateProgressionBtn');
-            const suggestSubstitutionsBtn = document.getElementById('suggestSubstitutionsBtn'); // Solo este botón
-            const circleContainer = document.getElementById('circle-of-fifths-container'); // Para la rotación
+            const suggestSubstitutionsBtn = document.getElementById('suggestSubstitutionsBtn');
+            const changeThemeBtn = document.getElementById('changeThemeBtn'); // Nuevo botón de tema
+            const circleContainer = document.getElementById('circle-of-fifths-container');
             const llmResponseModal = document.getElementById('llmResponseModal');
             const closeButton = document.querySelector('.close-button');
             const modalTitle = document.getElementById('modalTitle');
             const llmResponseText = document.getElementById('llmResponseText');
+            const scaleDisplay = document.getElementById('scale-display'); // Nuevo elemento para la escala
 
             let currentSelectedNote = null;
+            const themes = ['theme-light', 'theme-dark', 'theme-vibrant'];
+            let currentThemeIndex = 0; // Inicia con el tema claro por defecto
+
+            // Establecer el tema inicial al cargar la página
+            document.body.classList.add(themes[currentThemeIndex]);
+
 
             // Función para obtener y mostrar la respuesta predefinida
             function getPredefinedResponse(note, type) {
@@ -683,6 +776,13 @@
                     if (targetRotation !== undefined) {
                         circleContainer.style.transform = `rotate(${targetRotation}deg)`;
                     }
+
+                    // Mostrar la escala de la nota seleccionada
+                    if (scales[selectedNote]) {
+                        scaleDisplay.textContent = `Escala de ${selectedNote}: ${scales[selectedNote].join(', ')}`;
+                    } else {
+                        scaleDisplay.textContent = `Escala de ${selectedNote}: No disponible.`;
+                    }
                 });
             });
 
@@ -701,6 +801,13 @@
                 } else {
                     showModal("Error", "Por favor, selecciona una nota en el círculo para obtener sugerencias de sustituciones.");
                 }
+            });
+
+            // Event listener para el botón de cambio de tema
+            changeThemeBtn.addEventListener('click', () => {
+                document.body.classList.remove(themes[currentThemeIndex]); // Eliminar tema actual
+                currentThemeIndex = (currentThemeIndex + 1) % themes.length; // Siguiente tema
+                document.body.classList.add(themes[currentThemeIndex]); // Aplicar nuevo tema
             });
         });
     </script>
