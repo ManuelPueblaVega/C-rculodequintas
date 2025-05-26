@@ -173,13 +173,27 @@
 
         /* Estilo para mostrar la escala */
         #scale-display {
-            margin-top: 2rem;
+            margin-top: 2rem; /* Espacio entre el círculo y la escala */
             font-size: 1.2rem;
             font-weight: 600;
             color: var(--text-color); /* Usar variable de tema */
             text-align: center;
             min-height: 2em; /* Para evitar saltos de diseño */
         }
+
+        /* Ajuste de margen para los botones */
+        .button-container {
+            margin-top: 1.5rem; /* Espacio entre la escala y los botones */
+        }
+
+        /* Ajuste de margen para el footer */
+        footer {
+            margin-top: 1.5rem; /* Espacio entre los botones y el footer (reducido) */
+            text-align: center;
+            width: 100%; /* Asegura que el footer ocupe todo el ancho disponible */
+            color: var(--text-color); /* Hereda el color del texto del tema */
+        }
+
 
         @media (max-width: 768px) {
             :root {
@@ -222,7 +236,7 @@
             }
 
             /* Estilos para los botones en móvil */
-            .flex-row.flex-wrap { /* Ya no es sm:flex-row, es directamente flex-row */
+            .flex-row.flex-wrap {
                 flex-direction: row;
                 flex-wrap: wrap;
                 justify-content: center;
@@ -237,6 +251,11 @@
 
             #scale-display {
                 font-size: 1rem;
+                margin-top: 1.5rem; /* Menos margen en móvil */
+            }
+
+            footer {
+                margin-top: 1rem; /* Aún menos margen en móvil */
             }
         }
 
@@ -265,6 +284,10 @@
             box-shadow: var(--circle-shadow); /* Reutilizar sombra del círculo */
             position: relative;
             color: var(--text-color); /* Usar variable de tema */
+        }
+
+        .modal-content h2 { /* Estilo para el título del modal */
+            color: var(--text-color);
         }
 
         .close-button {
@@ -318,11 +341,13 @@
         </div>
 
         <div class="circle-center">
-            <span class="icon">🔒</span>
-        </div>
+            <span class="icon">🎵</span> </div>
     </div>
 
-    <div class="flex flex-row flex-wrap justify-center gap-4 mt-8">
+    <div id="scale-display" class="mt-8 text-lg font-semibold text-gray-700">
+        </div>
+
+    <div class="button-container flex flex-row flex-wrap justify-center gap-4">
         <button id="generateProgressionBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
             Generar Progresión de Acordes
         </button>
@@ -334,8 +359,9 @@
         </button>
     </div>
 
-    <div id="scale-display" class="mt-8 text-lg font-semibold text-gray-700">
-        </div>
+    <footer class="mt-8 text-sm text-gray-600">
+        Creado por Manuel Puebla Vega
+    </footer>
 
     <div id="llmResponseModal" class="modal">
         <div class="modal-content">
@@ -346,10 +372,6 @@
             </div>
         </div>
     </div>
-
-    <footer class="mt-12 text-sm text-gray-600">
-        Creado por Manuel Puebla Vega
-    </footer>
 
     <script>
         // Define las relaciones entre las tonalidades mayores y sus acordes diatónicos (mayores y menores)
@@ -686,23 +708,20 @@
             const noteSegments = document.querySelectorAll('.note-segment');
             const generateProgressionBtn = document.getElementById('generateProgressionBtn');
             const suggestSubstitutionsBtn = document.getElementById('suggestSubstitutionsBtn');
-            const changeThemeBtn = document.getElementById('changeThemeBtn'); // Nuevo botón de tema
+            const changeThemeBtn = document.getElementById('changeThemeBtn');
             const circleContainer = document.getElementById('circle-of-fifths-container');
             const llmResponseModal = document.getElementById('llmResponseModal');
             const closeButton = document.querySelector('.close-button');
             const modalTitle = document.getElementById('modalTitle');
             const llmResponseText = document.getElementById('llmResponseText');
-            const scaleDisplay = document.getElementById('scale-display'); // Nuevo elemento para la escala
+            const scaleDisplay = document.getElementById('scale-display');
 
             let currentSelectedNote = null;
             const themes = ['theme-light', 'theme-dark', 'theme-vibrant'];
-            let currentThemeIndex = 0; // Inicia con el tema claro por defecto
+            let currentThemeIndex = 0;
 
-            // Establecer el tema inicial al cargar la página
             document.body.classList.add(themes[currentThemeIndex]);
 
-
-            // Función para obtener y mostrar la respuesta predefinida
             function getPredefinedResponse(note, type) {
                 if (predefinedResponses[note] && predefinedResponses[note][type]) {
                     const responsesArray = predefinedResponses[note][type];
@@ -718,14 +737,12 @@
                 }
             }
 
-            // Función para mostrar el modal
             function showModal(title, content) {
                 modalTitle.textContent = title;
                 llmResponseText.innerHTML = content;
                 llmResponseModal.style.display = 'flex';
             }
 
-            // Función para ocultar el modal
             function hideModal() {
                 llmResponseModal.style.display = 'none';
                 llmResponseText.textContent = '';
@@ -744,7 +761,6 @@
                     const selectedNote = segment.dataset.note;
                     currentSelectedNote = selectedNote;
 
-                    // Limpiar resaltado anterior
                     noteSegments.forEach(s => s.classList.remove('highlighted'));
 
                     let notesToHighlight = new Set();
@@ -771,13 +787,11 @@
                         });
                     }
 
-                    // Rotar el círculo para alinear la nota seleccionada
                     const targetRotation = noteAlignmentRotation[selectedNote];
                     if (targetRotation !== undefined) {
                         circleContainer.style.transform = `rotate(${targetRotation}deg)`;
                     }
 
-                    // Mostrar la escala de la nota seleccionada
                     if (scales[selectedNote]) {
                         scaleDisplay.textContent = `Escala de ${selectedNote}: ${scales[selectedNote].join(', ')}`;
                     } else {
@@ -786,7 +800,6 @@
                 });
             });
 
-            // Modificación de los Event Listeners para usar datos predefinidos
             generateProgressionBtn.addEventListener('click', () => {
                 if (currentSelectedNote) {
                     getPredefinedResponse(currentSelectedNote, 'progression');
@@ -803,11 +816,10 @@
                 }
             });
 
-            // Event listener para el botón de cambio de tema
             changeThemeBtn.addEventListener('click', () => {
-                document.body.classList.remove(themes[currentThemeIndex]); // Eliminar tema actual
-                currentThemeIndex = (currentThemeIndex + 1) % themes.length; // Siguiente tema
-                document.body.classList.add(themes[currentThemeIndex]); // Aplicar nuevo tema
+                document.body.classList.remove(themes[currentThemeIndex]);
+                currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+                document.body.classList.add(themes[currentThemeIndex]);
             });
         });
     </script>
