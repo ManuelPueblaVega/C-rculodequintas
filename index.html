@@ -6,7 +6,7 @@
     <title>Círculo de Quintas Interactivo (Sin API)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* (El CSS es el mismo que en las versiones anteriores) */
+        /* Variables CSS para tamaños y dimensiones, facilitando la responsividad */
         :root {
             --circle-desktop-size: 600px;
             --outer-segment-width: 100px;
@@ -285,6 +285,54 @@
     </div>
 
     <script>
+        // Define las relaciones entre las tonalidades mayores y sus acordes diatónicos (mayores y menores)
+        // y la tonalidad menor relativa.
+        // Se definen fuera del DOMContentLoaded para asegurar su disponibilidad global en el script.
+        const tonalidades = {
+            'C': { major: ['C', 'F', 'G'], minor: ['Am', 'Dm', 'Em'] },
+            'G': { major: ['G', 'C', 'D'], minor: ['Em', 'Am', 'Bm'] },
+            'D': { major: ['D', 'G', 'A'], minor: ['Bm', 'Em', 'F#m'] },
+            'A': { major: ['A', 'D', 'E'], minor: ['F#m', 'Bm', 'C#m'] },
+            'E': { major: ['E', 'A', 'B'], minor: ['C#m', 'F#m', 'G#m'] },
+            'B': { major: ['B', 'E', 'F#'], minor: ['G#m', 'C#m', 'Ebm'] },
+            'F#': { major: ['F#', 'B', 'C#'], minor: ['Ebm', 'G#m', 'Bbm'] },
+            'Db': { major: ['Db', 'Gb', 'Ab'], minor: ['Bbm', 'Ebm', 'Fm'] },
+            'Ab': { major: ['Ab', 'Db', 'Eb'], minor: ['Fm', 'Bbm', 'Cm'] },
+            'Eb': { major: ['Eb', 'Ab', 'Bb'], minor: ['Cm', 'Fm', 'Gm'] },
+            'Bb': { major: ['Bb', 'Eb', 'F'], minor: ['Gm', 'Cm', 'Dm'] },
+            'F': { major: ['F', 'Bb', 'C'], minor: ['Dm', 'Gm', 'Am'] },
+        };
+
+        // Define el mapeo de las tonalidades menores a sus tonalidades mayores relativas.
+        const relativeMajors = {
+            'Am': 'C', 'Em': 'G', 'Bm': 'D', 'F#m': 'A', 'C#m': 'E', 'G#m': 'B',
+            'Ebm': 'F#', 'Bbm': 'Db', 'Fm': 'Ab', 'Cm': 'Eb', 'Gm': 'Bb', 'Dm': 'F',
+        };
+
+        // --- Datos predefinidos para las respuestas ---
+        // Se definen fuera del DOMContentLoaded para asegurar su disponibilidad global en el script.
+        const predefinedResponses = {
+            "C": {
+                "progression": "Una progresión clásica en Do Mayor es **C - G - Am - F** (I - V - vi - IV). Transmite un sentimiento alegre y familiar.",
+                "explanation": "La tonalidad de Do Mayor (C) no tiene sostenidos ni bemoles en su armadura de clave. Sus acordes principales son C (Do Mayor), F (Fa Mayor) y G (Sol Mayor). Es una tonalidad brillante y muy común.",
+                "substitutions": "Para C mayor: Gsus4 puede sustituir a G. Am7 para C. Cmaj7 para un sonido más suave.",
+                "songIdeas": "1. Una balada alegre sobre el primer amor. 2. Una canción infantil con un coro pegadizo. 3. Un himno de gratitud y esperanza."
+            },
+            "G": {
+                "progression": "Una progresión popular en Sol Mayor es **G - D - Em - C** (I - V - vi - IV). Es una progresión muy usada en folk y rock.",
+                "explanation": "La tonalidad de Sol Mayor (G) tiene un sostenido (F#) en su armadura de clave. Sus acordes principales son G (Sol Mayor), C (Do Mayor) y D (Re Mayor). Es una tonalidad cálida y versátil.",
+                "substitutions": "Para G mayor: Cadd9 puede sustituir a C. Dsus4 a D. Bm7 para Em.",
+                "songIdeas": "1. Un tema aventurero sobre un viaje por carretera. 2. Una canción campestre sobre la naturaleza. 3. Un himno optimista de superación."
+            },
+            "Am": {
+                "progression": "Una progresión común en La Menor es **Am - G - C - F** (i - VII - III - VI). Tiene un sentimiento melancólico pero con resolución.",
+                "explanation": "La tonalidad de La Menor (Am) es la relativa menor de Do Mayor. No tiene sostenidos ni bemoles. Sus acordes principales son Am (La Menor), Dm (Re Menor) y Em (Mi Menor) o E Mayor (V armónico).",
+                "substitutions": "Para Am menor: Dsus2 puede sustituir a Dm. Em7 para Am. Gmaj7 para un sonido más sofisticado.",
+                "songIdeas": "1. Una historia de desamor en la noche. 2. Un cuento gótico sobre un viejo misterio. 3. Un lamento por tiempos perdidos."
+            },
+            // --- Puedes añadir más notas y sus respuestas aquí ---
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             const noteSegments = document.querySelectorAll('.note-segment');
             const generateProgressionBtn = document.getElementById('generateProgressionBtn');
@@ -297,42 +345,6 @@
             const llmResponseText = document.getElementById('llmResponseText');
 
             let currentSelectedNote = null;
-
-            // --- Datos predefinidos para las respuestas ---
-            const predefinedResponses = {
-                "C": {
-                    "progression": "Una progresión clásica en Do Mayor es **C - G - Am - F** (I - V - vi - IV). Transmite un sentimiento alegre y familiar.",
-                    "explanation": "La tonalidad de Do Mayor (C) no tiene sostenidos ni bemoles en su armadura de clave. Sus acordes principales son C (Do Mayor), F (Fa Mayor) y G (Sol Mayor). Es una tonalidad brillante y muy común.",
-                    "substitutions": "Para C mayor: Gsus4 puede sustituir a G. Am7 para C. Cmaj7 para un sonido más suave.",
-                    "songIdeas": "1. Una balada alegre sobre el primer amor. 2. Una canción infantil con un coro pegadizo. 3. Un himno de gratitud y esperanza."
-                },
-                "G": {
-                    "progression": "Una progresión popular en Sol Mayor es **G - D - Em - C** (I - V - vi - IV). Es una progresión muy usada en folk y rock.",
-                    "explanation": "La tonalidad de Sol Mayor (G) tiene un sostenido (F#) en su armadura de clave. Sus acordes principales son G (Sol Mayor), C (Do Mayor) y D (Re Mayor). Es una tonalidad cálida y versátil.",
-                    "substitutions": "Para G mayor: Cadd9 puede sustituir a C. Dsus4 a D. Bm7 para Em.",
-                    "songIdeas": "1. Un tema aventurero sobre un viaje por carretera. 2. Una canción campestre sobre la naturaleza. 3. Un himno optimista de superación."
-                },
-                "Am": {
-                    "progression": "Una progresión común en La Menor es **Am - G - C - F** (i - VII - III - VI). Tiene un sentimiento melancólico pero con resolución.",
-                    "explanation": "La tonalidad de La Menor (Am) es la relativa menor de Do Mayor. No tiene sostenidos ni bemoles. Sus acordes principales son Am (La Menor), Dm (Re Menor) y Em (Mi Menor) o E Mayor (V armónico).",
-                    "substitutions": "Para Am menor: Dsus2 puede sustituir a Dm. Em7 para Am. Gmaj7 para un sonido más sofisticado.",
-                    "songIdeas": "1. Una historia de desamor en la noche. 2. Un cuento gótico sobre un viejo misterio. 3. Un lamento por tiempos perdidos."
-                },
-                // --- Puedes añadir más notas y sus respuestas aquí ---
-                // "D": {
-                //     "progression": "...",
-                //     "explanation": "...",
-                //     "substitutions": "...",
-                //     "songIdeas": "..."
-                // },
-                // "Dm": {
-                //     "progression": "...",
-                //     "explanation": "...",
-                //     "substitutions": "...",
-                //     "songIdeas": "..."
-                // }
-                // --- Fin de datos predefinidos ---
-            };
 
             // Función para obtener y mostrar la respuesta predefinida
             function getPredefinedResponse(note, type) {
@@ -439,4 +451,3 @@
     </script>
 </body>
 </html>
-
