@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Círculo de Quintas Interactivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Variables CSS para tamaños y dimensiones, facilitando la responsividad */
+        :root {
+            --circle-desktop-size: 600px;
+            --outer-segment-width: 100px;
+            --outer-segment-height: 50px;
+            --inner-segment-width: 80px;
+            --inner-segment-height: 40px;
+            --circle-center-size: 100px;
+        }
+
+        /* Estilos generales del cuerpo */
+        body {
+            font-family: 'Inter', sans-serif; /* Fuente moderna y legible */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Ocupa toda la altura de la ventana */
+            background-color: #f0f0f0; /* Fondo gris claro */
+            overflow: hidden; /* Evita barras de desplazamiento por las rotaciones */
+            padding: 1rem; /* Espaciado general */
+        }
+
+        /* Contenedor principal del círculo de quintas */
+        #circle-of-fifths-container {
+            position: relative;
+            width: var(--circle-desktop-size); /* Tamaño base para escritorio */
+            height: var(--circle-desktop-size);
+            border-radius: 50%; /* Hace que el contenedor sea circular */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Tamaños máximos para responsividad en pantallas más grandes */
+            max-width: 90vw;
+            max-height: 90vw;
+            background-color: #ffffff; /* Fondo blanco para el círculo */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); /* Sombra suave */
+        }
+
+        /* Círculos exterior e interior */
+        .outer-circle, .inner-circle {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .inner-circle {
+            width: 60%; /* Círculo interior más pequeño */
+            height: 60%;
+        }
+
+        /* Estilos de los segmentos de notas */
+        .note-segment {
+            position: absolute;
+            width: var(--outer-segment-width); /* Usamos variables */
+            height: var(--outer-segment-height); /* Usamos variables */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: #fff; /* Color de fondo por defecto */
+            border: 1px solid #ccc; /* Borde gris claro */
+            transition: background-color 0.3s ease, color 0.3s ease; /* Transición suave para el resaltado */
+            border-radius: 0.5rem; /* Esquinas redondeadas */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Sombra ligera */
+            color: #333; /* Color de texto por defecto */
+            font-size: 1.1rem;
+        }
+
+        /* Posicionamiento y rotación de los segmentos del círculo exterior */
+        /* transform-origin se calcula para que la rotación sea desde el centro del círculo contenedor */
+        /* translateY mueve el segmento hacia afuera desde el centro del círculo, ajustado por la mitad de su altura */
+        .outer-circle .note-segment {
+            transform-origin: 50% calc(var(--circle-desktop-size) / 2);
+            transform: translateY(calc( -1 * (var(--circle-desktop-size) / 2) + (var(--outer-segment-height) / 2) )) rotate(var(--rotation-deg));
+        }
+
+        /* Posicionamiento y rotación de los segmentos del círculo interior */
+        .inner-circle .note-segment {
+            width: var(--inner-segment-width); /* Usamos variables */
+            height: var(--inner-segment-height); /* Usamos variables */
+            transform-origin: 50% calc(var(--circle-desktop-size) * 0.6 / 2);
+            transform: translateY(calc( -1 * (var(--circle-desktop-size) * 0.6 / 2) + (var(--inner-segment-height) / 2) )) rotate(var(--rotation-deg));
+        }
+
+        /* Variables CSS para la rotación dinámica de cada segmento (30 grados cada uno) */
+        .outer-circle .note-segment:nth-child(1), .inner-circle .note-segment:nth-child(1) { --rotation-deg: 0deg; }
+        .outer-circle .note-segment:nth-child(2), .inner-circle .note-segment:nth-child(2) { --rotation-deg: 30deg; }
+        .outer-circle .note-segment:nth-child(3), .inner-circle .note-segment:nth-child(3) { --rotation-deg: 60deg; }
+        .outer-circle .note-segment:nth-child(4), .inner-circle .note-segment:nth-child(4) { --rotation-deg: 90deg; }
+        .outer-circle .note-segment:nth-child(5), .inner-circle .note-segment:nth-child(5) { --rotation-deg: 120deg; }
+        .outer-circle .note-segment:nth-child(6), .inner-circle .note-segment:nth-child(6) { --rotation-deg: 150deg; }
+        .outer-circle .note-segment:nth-child(7), .inner-circle .note-segment:nth-child(7) { --rotation-deg: 180deg; }
+        .outer-circle .note-segment:nth-child(8), .inner-circle .note-segment:nth-child(8) { --rotation-deg: 210deg; }
+        .outer-circle .note-segment:nth-child(9), .inner-circle .note-segment:nth-child(9) { --rotation-deg: 240deg; }
+        .outer-circle .note-segment:nth-child(10), .inner-circle .note-segment:nth-child(10) { --rotation-deg: 270deg; }
+        .outer-circle .note-segment:nth-child(11), .inner-circle .note-segment:nth-child(11) { --rotation-deg: 300deg; }
+        .outer-circle .note-segment:nth-child(12), .inner-circle .note-segment:nth-child(12) { --rotation-deg: 330deg; }
+
+        /* Estilo para los segmentos resaltados */
+        .note-segment.highlighted {
+            background-color: #ffaa00; /* Naranja como en tu imagen */
+            color: white; /* Texto blanco para contraste */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Sombra más pronunciada */
+        }
+
+        /* Centro del círculo */
+        .circle-center {
+            position: absolute;
+            width: var(--circle-center-size); /* Usamos variables */
+            height: var(--circle-center-size); /* Usamos variables */
+            background-color: #eee; /* Fondo gris claro */
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em; /* Tamaño grande para el icono */
+            color: #666; /* Color gris oscuro para el icono */
+            z-index: 10; /* Asegura que esté por encima de los segmentos */
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); /* Sombra interior */
+        }
+
+        /* Ajustes responsivos para pantallas más pequeñas (móviles) */
+        @media (max-width: 768px) {
+            /* Nuevas variables para tamaños en móvil */
+            :root {
+                --circle-mobile-size: 95vw;
+                --outer-segment-width: 80px;
+                --outer-segment-height: 40px;
+                --inner-segment-width: 60px; /* Ligeramente más pequeño para el interior */
+                --inner-segment-height: 30px;
+                --circle-center-size: 80px;
+            }
+
+            #circle-of-fifths-container {
+                width: var(--circle-mobile-size); /* Ocupa casi todo el ancho de la ventana */
+                height: var(--circle-mobile-size); /* Mantiene la proporción cuadrada */
+            }
+
+            /* Ajuste de los segmentos para móvil */
+            .note-segment {
+                font-size: 0.8em; /* Fuente más pequeña */
+            }
+
+            /* Ajuste del origen de rotación y traslación para el círculo exterior en móviles */
+            .outer-circle .note-segment {
+                width: var(--outer-segment-width);
+                height: var(--outer-segment-height);
+                transform-origin: 50% calc(var(--circle-mobile-size) / 2);
+                transform: translateY(calc( -1 * (var(--circle-mobile-size) / 2) + (var(--outer-segment-height) / 2) )) rotate(var(--rotation-deg));
+            }
+
+            /* Ajuste del origen de rotación y traslación para el círculo interior en móviles */
+            .inner-circle .note-segment {
+                width: var(--inner-segment-width);
+                height: var(--inner-segment-height);
+                transform-origin: 50% calc(var(--circle-mobile-size) * 0.6 / 2);
+                transform: translateY(calc( -1 * (var(--circle-mobile-size) * 0.6 / 2) + (var(--inner-segment-height) / 2) )) rotate(var(--rotation-deg));
+                font-size: 0.7em; /* Aún más pequeña para el interior */
+            }
+
+            .circle-center {
+                width: var(--circle-center-size);
+                height: var(--circle-center-size);
+                font-size: 1.5em;
+            }
+        }
+
+        /* Estilos para el modal */
+        .modal {
+            display: none; /* Oculto por defecto */
+            position: fixed; /* Permanece en su lugar */
+            z-index: 100; /* Por encima de todo lo demás */
+            left: 0;
+            top: 0;
+            width: 100%; /* Ancho completo */
+            height: 100%; /* Alto completo */
+            overflow: auto; /* Permite desplazamiento si el contenido es demasiado grande */
+            background-color: rgba(0,0,0,0.4); /* Fondo semi-transparente */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto; /* Centra el modal */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Ancho del contenido del modal */
+            max-width: 500px; /* Ancho máximo */
+            border-radius: 0.75rem; /* Esquinas redondeadas */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Sombra para el modal */
+            position: relative; /* Para el botón de cerrar */
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #ffaa00; /* Orange */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto; /* Center the spinner */
+            display: none; /* Hidden by default */
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform = rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+    <h1 class="text-3xl font-bold mb-8 text-gray-800">Círculo de Quintas Interactivo</h1>
+
+    <div id="circle-of-fifths-container" class="relative flex items-center justify-center bg-white rounded-full shadow-lg">
+        <div class="outer-circle">
+            <div class="note-segment" data-note="C">C</div>
+            <div class="note-segment" data-note="G">G</div>
+            <div class="note-segment" data-note="D">D</div>
+            <div class="note-segment" data-note="A">A</div>
+            <div class="note-segment" data-note="E">E</div>
+            <div class="note-segment" data-note="B">B</div>
+            <div class="note-segment" data-note="F#">F#</div>
+            <div class="note-segment" data-note="Db">Db</div>
+            <div class="note-segment" data-note="Ab">Ab</div>
+            <div class="note-segment" data-note="Eb">Eb</div>
+            <div class="note-segment" data-note="Bb">Bb</div>
+            <div class="note-segment" data-note="F">F</div>
+        </div>
+
+        <div class="inner-circle">
+            <div class="note-segment" data-note="Am">Am</div>
+            <div class="note-segment" data-note="Em">Em</div>
+            <div class="note-segment" data-note="Bm">Bm</div>
+            <div class="note-segment" data-note="F#m">F#m</div>
+            <div class="note-segment" data-note="C#m">C#m</div>
+            <div class="note-segment" data-note="G#m">G#m</div>
+            <div class="note-segment" data-note="Ebm">Ebm</div>
+            <div class="note-segment" data-note="Bbm">Bbm</div>
+            <div class="note-segment" data-note="Fm">Fm</div>
+            <div class="note-segment" data-note="Cm">Cm</div>
+            <div class="note-segment" data-note="Gm">Gm</div>
+            <div class="note-segment" data-note="Dm">Dm</div>
+        </div>
+
+        <div class="circle-center">
+            <span class="icon">🔒</span>
+        </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-4 mt-8">
+        <button id="generateProgressionBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+            Generar Progresión de Acordes ✨
+        </button>
+        <button id="explainKeyBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+            Explicar Tonalidad ✨
+        </button>
+    </div>
+
+    <div id="llmResponseModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2 id="modalTitle" class="text-xl font-bold mb-4 text-gray-800"></h2>
+            <div id="modalBody" class="text-gray-700">
+                <div id="loadingSpinner" class="loading-spinner"></div>
+                <p id="llmResponseText"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Selecciona todos los segmentos de notas en ambos círculos
+            const noteSegments = document.querySelectorAll('.note-segment');
+            const generateProgressionBtn = document.getElementById('generateProgressionBtn');
+            const explainKeyBtn = document.getElementById('explainKeyBtn');
+            const llmResponseModal = document.getElementById('llmResponseModal');
+            const closeButton = document.querySelector('.close-button');
+            const modalTitle = document.getElementById('modalTitle');
+            const llmResponseText = document.getElementById('llmResponseText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+
+            let currentSelectedNote = null; // Variable para almacenar la nota seleccionada
+
+            // Define las relaciones entre las tonalidades mayores y sus acordes diatónicos (mayores y menores)
+            // y la tonalidad menor relativa.
+            // Cada entrada de tonalidad mayor incluye:
+            //   - major: [Tónica (I), Subdominante (IV), Dominante (V)]
+            //   - minor: [Relativa Menor (vi), Supertónica Menor (ii), Mediante Menor (iii)]
+            const tonalidades = {
+                'C': { major: ['C', 'F', 'G'], minor: ['Am', 'Dm', 'Em'] },
+                'G': { major: ['G', 'C', 'D'], minor: ['Em', 'Am', 'Bm'] },
+                'D': { major: ['D', 'G', 'A'], minor: ['Bm', 'Em', 'F#m'] },
+                'A': { major: ['A', 'D', 'E'], minor: ['F#m', 'Bm', 'C#m'] },
+                'E': { major: ['E', 'A', 'B'], minor: ['C#m', 'F#m', 'G#m'] },
+                'B': { major: ['B', 'E', 'F#'], minor: ['G#m', 'C#m', 'Ebm'] }, // G#m es enarmónico con Abm
+                'F#': { major: ['F#', 'B', 'C#'], minor: ['Ebm', 'G#m', 'Bbm'] }, // Ebm es enarmónico con D#m
+                'Db': { major: ['Db', 'Gb', 'Ab'], minor: ['Bbm', 'Ebm', 'Fm'] },
+                'Ab': { major: ['Ab', 'Db', 'Eb'], minor: ['Fm', 'Bbm', 'Cm'] },
+                'Eb': { major: ['Eb', 'Ab', 'Bb'], minor: ['Cm', 'Fm', 'Gm'] },
+                'Bb': { major: ['Bb', 'Eb', 'F'], minor: ['Gm', 'Cm', 'Dm'] },
+                'F': { major: ['F', 'Bb', 'C'], minor: ['Dm', 'Gm', 'Am'] },
+            };
+
+            // Define el mapeo de las tonalidades menores a sus tonalidades mayores relativas.
+            const relativeMajors = {
+                'Am': 'C',
+                'Em': 'G',
+                'Bm': 'D',
+                'F#m': 'A',
+                'C#m': 'E',
+                'G#m': 'B',
+                'Ebm': 'F#',
+                'Bbm': 'Db',
+                'Fm': 'Ab',
+                'Cm': 'Eb',
+                'Gm': 'Bb',
+                'Dm': 'F',
+            };
+
+            // Función para mostrar el modal con el contenido
+            function showModal(title, content) {
+                modalTitle.textContent = title;
+                llmResponseText.innerHTML = content; // Usar innerHTML para permitir formato básico
+                loadingSpinner.style.display = 'none'; // Ocultar spinner
+                llmResponseModal.style.display = 'flex'; // Mostrar modal
+            }
+
+            // Función para ocultar el modal
+            function hideModal() {
+                llmResponseModal.style.display = 'none';
+                llmResponseText.textContent = ''; // Limpiar contenido
+                modalTitle.textContent = ''; // Limpiar título
+            }
+
+            // Event listener para cerrar el modal
+            closeButton.addEventListener('click', hideModal);
+            window.addEventListener('click', (event) => {
+                if (event.target == llmResponseModal) {
+                    hideModal();
+                }
+            });
+
+            // Añade un 'event listener' de clic a cada segmento de nota
+            noteSegments.forEach(segment => {
+                segment.addEventListener('click', () => {
+                    // Obtiene el atributo 'data-note' del segmento clickeado
+                    const selectedNote = segment.dataset.note;
+                    currentSelectedNote = selectedNote; // Actualiza la nota seleccionada globalmente
+
+                    // Remueve la clase 'highlighted' de todos los segmentos para limpiar la selección anterior
+                    noteSegments.forEach(s => s.classList.remove('highlighted'));
+
+                    // Conjunto para almacenar todas las notas/acordes que necesitan ser resaltados
+                    let notesToHighlight = new Set();
+
+                    // Determina qué notas resaltar basándose en la nota seleccionada
+                    if (tonalidades[selectedNote]) {
+                        // Si se selecciona una tonalidad mayor (ej. 'C')
+                        const currentTonalidadData = tonalidades[selectedNote];
+                        notesToHighlight.add(selectedNote); // Añade la tonalidad mayor (tónica)
+                        currentTonalidadData.major.forEach(note => notesToHighlight.add(note)); // Añade acordes I, IV, V mayores
+                        currentTonalidadData.minor.forEach(note => notesToHighlight.add(note)); // Añade acordes vi, ii, iii menores
+                    } else if (relativeMajors[selectedNote]) {
+                        // Si se selecciona una tonalidad menor (ej. 'Am')
+                        const majorKey = relativeMajors[selectedNote]; // Encuentra su mayor relativa ('C' para 'Am')
+                        const currentTonalidadData = tonalidades[majorKey];
+                        notesToHighlight.add(selectedNote); // Añade la tonalidad menor (tónica)
+                        notesToHighlight.add(majorKey); // Añade su tonalidad mayor relativa
+                        currentTonalidadData.major.forEach(note => notesToHighlight.add(note)); // Añade acordes I, IV, V mayores de la relativa mayor
+                        currentTonalidadData.minor.forEach(note => notesToHighlight.add(note)); // Añade acordes vi, ii, iii menores de la relativa mayor
+                    }
+
+                    // Aplica la clase 'highlighted' a todos los segmentos determinados
+                    if (notesToHighlight.size > 0) {
+                        notesToHighlight.forEach(noteToFind => {
+                            // Encuentra el segmento correspondiente usando su atributo 'data-note'
+                            const foundSegment = document.querySelector(`.note-segment[data-note="${noteToFind}"]`);
+                            if (foundSegment) {
+                                foundSegment.classList.add('highlighted');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Función para llamar a la API de Gemini
+            async function callGeminiAPI(prompt, title) {
+                if (!currentSelectedNote) {
+                    showModal("Error", "Por favor, selecciona una nota en el círculo primero.");
+                    return;
+                }
+
+                modalTitle.textContent = title;
+                llmResponseText.textContent = '';
+                loadingSpinner.style.display = 'block'; // Mostrar spinner
+                llmResponseModal.style.display = 'flex'; // Mostrar modal
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // La clave API será proporcionada por el entorno de Canvas
+
+                try {
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        llmResponseText.innerHTML = text; // Usar innerHTML para interpretar markdown
+                    } else {
+                        llmResponseText.textContent = "No se pudo obtener una respuesta del modelo.";
+                        console.error("Respuesta inesperada del LLM:", result);
+                    }
+                } catch (error) {
+                    llmResponseText.textContent = `Error al conectar con el modelo: ${error.message}`;
+                    console.error("Error al llamar a la API de Gemini:", error);
+                } finally {
+                    loadingSpinner.style.display = 'none'; // Ocultar spinner
+                }
+            }
+
+            // Event listener para el botón de generar progresión
+            generateProgressionBtn.addEventListener('click', () => {
+                if (currentSelectedNote) {
+                    const prompt = `Genera una progresión de acordes común y musicalmente interesante para la tonalidad de ${currentSelectedNote}. Proporciona los acordes en notación de letras (C, G, Am, F) y una breve descripción de su sentimiento.`;
+                    callGeminiAPI(prompt, `Progresión de Acordes para ${currentSelectedNote}`);
+                } else {
+                    showModal("Error", "Por favor, selecciona una nota en el círculo para generar una progresión.");
+                }
+            });
+
+            // Event listener para el botón de explicar tonalidad
+            explainKeyBtn.addEventListener('click', () => {
+                if (currentSelectedNote) {
+                    const prompt = `Explica brevemente la tonalidad de ${currentSelectedNote} en términos de teoría musical, incluyendo su armadura de clave y algunos de sus acordes principales.`;
+                    callGeminiAPI(prompt, `Explicación de la Tonalidad de ${currentSelectedNote}`);
+                } else {
+                    showModal("Error", "Por favor, selecciona una nota en el círculo para obtener una explicación.");
+                }
+            });
+        });
+    </script>
+</body>
+</html>
