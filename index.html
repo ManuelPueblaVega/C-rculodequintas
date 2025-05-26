@@ -309,8 +309,8 @@
             const noteSegments = document.querySelectorAll('.note-segment');
             const generateProgressionBtn = document.getElementById('generateProgressionBtn');
             const explainKeyBtn = document.getElementById('explainKeyBtn');
-            const suggestSubstitutionsBtn = document.getElementById('suggestSubstitutionsBtn'); // Nuevo botón
-            const generateSongIdeasBtn = document.getElementById('generateSongIdeasBtn');       // Nuevo botón
+            const suggestSubstitutionsBtn = document.getElementById('suggestSubstitutionsBtn');
+            const generateSongIdeasBtn = document.getElementById('generateSongIdeasBtn');
             const llmResponseModal = document.getElementById('llmResponseModal');
             const closeButton = document.querySelector('.close-button');
             const modalTitle = document.getElementById('modalTitle');
@@ -321,17 +321,14 @@
 
             // Define las relaciones entre las tonalidades mayores y sus acordes diatónicos (mayores y menores)
             // y la tonalidad menor relativa.
-            // Cada entrada de tonalidad mayor incluye:
-            //   - major: [Tónica (I), Subdominante (IV), Dominante (V)]
-            //   - minor: [Relativa Menor (vi), Supertónica Menor (ii), Mediante Menor (iii)]
             const tonalidades = {
                 'C': { major: ['C', 'F', 'G'], minor: ['Am', 'Dm', 'Em'] },
                 'G': { major: ['G', 'C', 'D'], minor: ['Em', 'Am', 'Bm'] },
                 'D': { major: ['D', 'G', 'A'], minor: ['Bm', 'Em', 'F#m'] },
                 'A': { major: ['A', 'D', 'E'], minor: ['F#m', 'Bm', 'C#m'] },
                 'E': { major: ['E', 'A', 'B'], minor: ['C#m', 'F#m', 'G#m'] },
-                'B': { major: ['B', 'E', 'F#'], minor: ['G#m', 'C#m', 'Ebm'] }, // G#m es enarmónico con Abm
-                'F#': { major: ['F#', 'B', 'C#'], minor: ['Ebm', 'G#m', 'Bbm'] }, // Ebm es enarmónico con D#m
+                'B': { major: ['B', 'E', 'F#'], minor: ['G#m', 'C#m', 'Ebm'] },
+                'F#': { major: ['F#', 'B', 'C#'], minor: ['Ebm', 'G#m', 'Bbm'] },
                 'Db': { major: ['Db', 'Gb', 'Ab'], minor: ['Bbm', 'Ebm', 'Fm'] },
                 'Ab': { major: ['Ab', 'Db', 'Eb'], minor: ['Fm', 'Bbm', 'Cm'] },
                 'Eb': { major: ['Eb', 'Ab', 'Bb'], minor: ['Cm', 'Fm', 'Gm'] },
@@ -341,33 +338,23 @@
 
             // Define el mapeo de las tonalidades menores a sus tonalidades mayores relativas.
             const relativeMajors = {
-                'Am': 'C',
-                'Em': 'G',
-                'Bm': 'D',
-                'F#m': 'A',
-                'C#m': 'E',
-                'G#m': 'B',
-                'Ebm': 'F#',
-                'Bbm': 'Db',
-                'Fm': 'Ab',
-                'Cm': 'Eb',
-                'Gm': 'Bb',
-                'Dm': 'F',
+                'Am': 'C', 'Em': 'G', 'Bm': 'D', 'F#m': 'A', 'C#m': 'E', 'G#m': 'B',
+                'Ebm': 'F#', 'Bbm': 'Db', 'Fm': 'Ab', 'Cm': 'Eb', 'Gm': 'Bb', 'Dm': 'F',
             };
 
             // Función para mostrar el modal con el contenido
             function showModal(title, content) {
                 modalTitle.textContent = title;
-                llmResponseText.innerHTML = content; // Usar innerHTML para permitir formato básico
-                loadingSpinner.style.display = 'none'; // Ocultar spinner
-                llmResponseModal.style.display = 'flex'; // Mostrar modal
+                llmResponseText.innerHTML = content;
+                loadingSpinner.style.display = 'none';
+                llmResponseModal.style.display = 'flex';
             }
 
             // Función para ocultar el modal
             function hideModal() {
                 llmResponseModal.style.display = 'none';
-                llmResponseText.textContent = ''; // Limpiar contenido
-                modalTitle.textContent = ''; // Limpiar título
+                llmResponseText.textContent = '';
+                modalTitle.textContent = '';
             }
 
             // Event listener para cerrar el modal
@@ -381,37 +368,29 @@
             // Añade un 'event listener' de clic a cada segmento de nota
             noteSegments.forEach(segment => {
                 segment.addEventListener('click', () => {
-                    // Obtiene el atributo 'data-note' del segmento clickeado
                     const selectedNote = segment.dataset.note;
-                    currentSelectedNote = selectedNote; // Actualiza la nota seleccionada globalmente
+                    currentSelectedNote = selectedNote;
 
-                    // Remueve la clase 'highlighted' de todos los segmentos para limpiar la selección anterior
                     noteSegments.forEach(s => s.classList.remove('highlighted'));
 
-                    // Conjunto para almacenar todas las notas/acordes que necesitan ser resaltados
                     let notesToHighlight = new Set();
 
-                    // Determina qué notas resaltar basándose en la nota seleccionada
                     if (tonalidades[selectedNote]) {
-                        // Si se selecciona una tonalidad mayor (ej. 'C')
                         const currentTonalidadData = tonalidades[selectedNote];
-                        notesToHighlight.add(selectedNote); // Añade la tonalidad mayor (tónica)
-                        currentTonalidadData.major.forEach(note => notesToHighlight.add(note)); // Añade acordes I, IV, V mayores
-                        currentTonalidadData.minor.forEach(note => notesToHighlight.add(note)); // Añade acordes vi, ii, iii menores
+                        notesToHighlight.add(selectedNote);
+                        currentTonalidadData.major.forEach(note => notesToHighlight.add(note));
+                        currentTonalidadData.minor.forEach(note => notesToHighlight.add(note));
                     } else if (relativeMajors[selectedNote]) {
-                        // Si se selecciona una tonalidad menor (ej. 'Am')
-                        const majorKey = relativeMajors[selectedNote]; // Encuentra su mayor relativa ('C' para 'Am')
+                        const majorKey = relativeMajors[selectedNote];
                         const currentTonalidadData = tonalidades[majorKey];
-                        notesToHighlight.add(selectedNote); // Añade la tonalidad menor (tónica)
-                        notesToHighlight.add(majorKey); // Añade su tonalidad mayor relativa
-                        currentTonalidadData.major.forEach(note => notesToHighlight.add(note)); // Añade acordes I, IV, V mayores de la relativa mayor
-                        currentTonalidadData.minor.forEach(note => notesToHighlight.add(note)); // Añade acordes vi, ii, iii menores de la relativa mayor
+                        notesToHighlight.add(selectedNote);
+                        notesToHighlight.add(majorKey);
+                        currentTonalidadData.major.forEach(note => notesToHighlight.add(note));
+                        currentTonalidadData.minor.forEach(note => notesToHighlight.add(note));
                     }
 
-                    // Aplica la clase 'highlighted' a todos los segmentos determinados
                     if (notesToHighlight.size > 0) {
                         notesToHighlight.forEach(noteToFind => {
-                            // Encuentra el segmento correspondiente usando su atributo 'data-note'
                             const foundSegment = document.querySelector(`.note-segment[data-note="${noteToFind}"]`);
                             if (foundSegment) {
                                 foundSegment.classList.add('highlighted');
@@ -430,8 +409,8 @@
 
                 modalTitle.textContent = title;
                 llmResponseText.textContent = '';
-                loadingSpinner.style.display = 'block'; // Mostrar spinner
-                llmResponseModal.style.display = 'flex'; // Mostrar modal
+                loadingSpinner.style.display = 'block';
+                llmResponseModal.style.display = 'flex';
 
                 let chatHistory = [];
                 chatHistory.push({ role: "user", parts: [{ text: prompt }] });
@@ -445,22 +424,31 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
+
+                    // Verificar si la respuesta HTTP fue exitosa
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        console.error("Error HTTP al llamar a la API de Gemini:", response.status, response.statusText, errorData);
+                        llmResponseText.textContent = `Error del servidor: ${response.status} ${response.statusText}. Detalles: ${errorData.error ? errorData.error.message : 'No hay detalles.'}`;
+                        return;
+                    }
+
                     const result = await response.json();
 
                     if (result.candidates && result.candidates.length > 0 &&
                         result.candidates[0].content && result.candidates[0].content.parts &&
                         result.candidates[0].content.parts.length > 0) {
                         const text = result.candidates[0].content.parts[0].text;
-                        llmResponseText.innerHTML = text; // Usar innerHTML para interpretar markdown
+                        llmResponseText.innerHTML = text;
                     } else {
-                        llmResponseText.textContent = "No se pudo obtener una respuesta del modelo.";
+                        llmResponseText.textContent = "No se pudo obtener una respuesta válida del modelo. La estructura de la respuesta fue inesperada.";
                         console.error("Respuesta inesperada del LLM:", result);
                     }
                 } catch (error) {
-                    llmResponseText.textContent = `Error al conectar con el modelo: ${error.message}`;
+                    llmResponseText.textContent = `Error al conectar con el modelo: ${error.message}. Por favor, verifica tu conexión a internet o intenta de nuevo más tarde.`;
                     console.error("Error al llamar a la API de Gemini:", error);
                 } finally {
-                    loadingSpinner.style.display = 'none'; // Ocultar spinner
+                    loadingSpinner.style.display = 'none';
                 }
             }
 
@@ -484,7 +472,7 @@
                 }
             });
 
-            // Nuevo: Event listener para el botón de sugerir sustituciones de acordes
+            // Event listener para el botón de sugerir sustituciones de acordes
             suggestSubstitutionsBtn.addEventListener('click', () => {
                 if (currentSelectedNote) {
                     const prompt = `Para la tonalidad de ${currentSelectedNote}, sugiere algunas sustituciones de acordes comunes y creativas. Explica brevemente por qué funcionan.`;
@@ -494,7 +482,7 @@
                 }
             });
 
-            // Nuevo: Event listener para el botón de generar ideas para canciones
+            // Event listener para el botón de generar ideas para canciones
             generateSongIdeasBtn.addEventListener('click', () => {
                 if (currentSelectedNote) {
                     const prompt = `Para la tonalidad de ${currentSelectedNote}, genera 3-5 ideas de temas o ambientes para una canción. Describe brevemente el sentimiento o la historia que cada idea evoca.`;
@@ -507,4 +495,3 @@
     </script>
 </body>
 </html>
-
