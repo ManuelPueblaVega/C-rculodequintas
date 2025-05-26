@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Círculo de Quintas Interactivo</title>
+    <title>Círculo de Quintas Interactivo (Sin API)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Variables CSS para tamaños y dimensiones, facilitando la responsividad */
+        /* (El CSS es el mismo que en las versiones anteriores) */
         :root {
             --circle-desktop-size: 600px;
             --outer-segment-width: 100px;
@@ -16,36 +16,32 @@
             --circle-center-size: 100px;
         }
 
-        /* Estilos generales del cuerpo */
         body {
-            font-family: 'Inter', sans-serif; /* Fuente moderna y legible */
+            font-family: 'Inter', sans-serif;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 100vh; /* Ocupa toda la altura de la ventana */
-            background-color: #f0f0f0; /* Fondo gris claro */
-            overflow: hidden; /* Evita barras de desplazamiento por las rotaciones */
-            padding: 1rem; /* Espaciado general */
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            overflow: hidden;
+            padding: 1rem;
         }
 
-        /* Contenedor principal del círculo de quintas */
         #circle-of-fifths-container {
             position: relative;
-            width: var(--circle-desktop-size); /* Tamaño base para escritorio */
+            width: var(--circle-desktop-size);
             height: var(--circle-desktop-size);
-            border-radius: 50%; /* Hace que el contenedor sea circular */
+            border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Tamaños máximos para responsividad en pantallas más grandes */
             max-width: 90vw;
             max-height: 90vw;
-            background-color: #ffffff; /* Fondo blanco para el círculo */
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1); /* Sombra suave */
+            background-color: #ffffff;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
 
-        /* Círculos exterior e interior */
         .outer-circle, .inner-circle {
             position: absolute;
             width: 100%;
@@ -57,46 +53,40 @@
         }
 
         .inner-circle {
-            width: 60%; /* Círculo interior más pequeño */
+            width: 60%;
             height: 60%;
         }
 
-        /* Estilos de los segmentos de notas */
         .note-segment {
             position: absolute;
-            width: var(--outer-segment-width); /* Usamos variables */
-            height: var(--outer-segment-height); /* Usamos variables */
+            width: var(--outer-segment-width);
+            height: var(--outer-segment-height);
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
             cursor: pointer;
-            background-color: #fff; /* Color de fondo por defecto */
-            border: 1px solid #ccc; /* Borde gris claro */
-            transition: background-color 0.3s ease, color 0.3s ease; /* Transición suave para el resaltado */
-            border-radius: 0.5rem; /* Esquinas redondeadas */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Sombra ligera */
-            color: #333; /* Color de texto por defecto */
+            background-color: #fff;
+            border: 1px solid #ccc;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #333;
             font-size: 1.1rem;
         }
 
-        /* Posicionamiento y rotación de los segmentos del círculo exterior */
-        /* transform-origin se calcula para que la rotación sea desde el centro del círculo contenedor */
-        /* translateY mueve el segmento hacia afuera desde el centro del círculo, ajustado por la mitad de su altura */
         .outer-circle .note-segment {
             transform-origin: 50% calc(var(--circle-desktop-size) / 2);
             transform: translateY(calc( -1 * (var(--circle-desktop-size) / 2) + (var(--outer-segment-height) / 2) )) rotate(var(--rotation-deg));
         }
 
-        /* Posicionamiento y rotación de los segmentos del círculo interior */
         .inner-circle .note-segment {
-            width: var(--inner-segment-width); /* Usamos variables */
-            height: var(--inner-segment-height); /* Usamos variables */
+            width: var(--inner-segment-width);
+            height: var(--inner-segment-height);
             transform-origin: 50% calc(var(--circle-desktop-size) * 0.6 / 2);
             transform: translateY(calc( -1 * (var(--circle-desktop-size) * 0.6 / 2) + (var(--inner-segment-height) / 2) )) rotate(var(--rotation-deg));
         }
 
-        /* Variables CSS para la rotación dinámica de cada segmento (30 grados cada uno) */
         .outer-circle .note-segment:nth-child(1), .inner-circle .note-segment:nth-child(1) { --rotation-deg: 0deg; }
         .outer-circle .note-segment:nth-child(2), .inner-circle .note-segment:nth-child(2) { --rotation-deg: 30deg; }
         .outer-circle .note-segment:nth-child(3), .inner-circle .note-segment:nth-child(3) { --rotation-deg: 60deg; }
@@ -110,52 +100,46 @@
         .outer-circle .note-segment:nth-child(11), .inner-circle .note-segment:nth-child(11) { --rotation-deg: 300deg; }
         .outer-circle .note-segment:nth-child(12), .inner-circle .note-segment:nth-child(12) { --rotation-deg: 330deg; }
 
-        /* Estilo para los segmentos resaltados */
         .note-segment.highlighted {
-            background-color: #ffaa00; /* Naranja como en tu imagen */
-            color: white; /* Texto blanco para contraste */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Sombra más pronunciada */
+            background-color: #ffaa00;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
-        /* Centro del círculo */
         .circle-center {
             position: absolute;
-            width: var(--circle-center-size); /* Usamos variables */
-            height: var(--circle-center-size); /* Usamos variables */
-            background-color: #eee; /* Fondo gris claro */
+            width: var(--circle-center-size);
+            height: var(--circle-center-size);
+            background-color: #eee;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 2em; /* Tamaño grande para el icono */
-            color: #666; /* Color gris oscuro para el icono */
-            z-index: 10; /* Asegura que esté por encima de los segmentos */
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); /* Sombra interior */
+            font-size: 2em;
+            color: #666;
+            z-index: 10;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* Ajustes responsivos para pantallas más pequeñas (móviles) */
         @media (max-width: 768px) {
-            /* Nuevas variables para tamaños en móvil */
             :root {
                 --circle-mobile-size: 95vw;
                 --outer-segment-width: 80px;
                 --outer-segment-height: 40px;
-                --inner-segment-width: 60px; /* Ligeramente más pequeño para el interior */
+                --inner-segment-width: 60px;
                 --inner-segment-height: 30px;
                 --circle-center-size: 80px;
             }
 
             #circle-of-fifths-container {
-                width: var(--circle-mobile-size); /* Ocupa casi todo el ancho de la ventana */
-                height: var(--circle-mobile-size); /* Mantiene la proporción cuadrada */
+                width: var(--circle-mobile-size);
+                height: var(--circle-mobile-size);
             }
 
-            /* Ajuste de los segmentos para móvil */
             .note-segment {
-                font-size: 0.8em; /* Fuente más pequeña */
+                font-size: 0.8em;
             }
 
-            /* Ajuste del origen de rotación y traslación para el círculo exterior en móviles */
             .outer-circle .note-segment {
                 width: var(--outer-segment-width);
                 height: var(--outer-segment-height);
@@ -163,13 +147,12 @@
                 transform: translateY(calc( -1 * (var(--circle-mobile-size) / 2) + (var(--outer-segment-height) / 2) )) rotate(var(--rotation-deg));
             }
 
-            /* Ajuste del origen de rotación y traslación para el círculo interior en móviles */
             .inner-circle .note-segment {
                 width: var(--inner-segment-width);
                 height: var(--inner-segment-height);
                 transform-origin: 50% calc(var(--circle-mobile-size) * 0.6 / 2);
                 transform: translateY(calc( -1 * (var(--circle-mobile-size) * 0.6 / 2) + (var(--inner-segment-height) / 2) )) rotate(var(--rotation-deg));
-                font-size: 0.7em; /* Aún más pequeña para el interior */
+                font-size: 0.7em;
             }
 
             .circle-center {
@@ -179,31 +162,30 @@
             }
         }
 
-        /* Estilos para el modal */
         .modal {
-            display: none; /* Oculto por defecto */
-            position: fixed; /* Permanece en su lugar */
-            z-index: 100; /* Por encima de todo lo demás */
+            display: none;
+            position: fixed;
+            z-index: 100;
             left: 0;
             top: 0;
-            width: 100%; /* Ancho completo */
-            height: 100%; /* Alto completo */
-            overflow: auto; /* Permite desplazamiento si el contenido es demasiado grande */
-            background-color: rgba(0,0,0,0.4); /* Fondo semi-transparente */
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
             justify-content: center;
             align-items: center;
         }
 
         .modal-content {
             background-color: #fefefe;
-            margin: auto; /* Centra el modal */
+            margin: auto;
             padding: 20px;
             border: 1px solid #888;
-            width: 80%; /* Ancho del contenido del modal */
-            max-width: 500px; /* Ancho máximo */
-            border-radius: 0.75rem; /* Esquinas redondeadas */
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Sombra para el modal */
-            position: relative; /* Para el botón de cerrar */
+            width: 80%;
+            max-width: 500px;
+            border-radius: 0.75rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
         }
 
         .close-button {
@@ -221,15 +203,15 @@
             cursor: pointer;
         }
 
-        .loading-spinner {
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #ffaa00; /* Orange */
+        .loading-spinner { /* No se usará, pero lo dejo por si acaso */
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ffaa00;
             border-radius: 50%;
             width: 24px;
             height: 24px;
             animation: spin 1s linear infinite;
-            margin: 0 auto; /* Center the spinner */
-            display: none; /* Hidden by default */
+            margin: 0 auto;
+            display: none;
         }
 
         @keyframes spin {
@@ -279,16 +261,16 @@
 
     <div class="flex flex-col sm:flex-row gap-4 mt-8">
         <button id="generateProgressionBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
-            Generar Progresión de Acordes ✨
+            Generar Progresión de Acordes
         </button>
         <button id="explainKeyBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
-            Explicar Tonalidad ✨
+            Explicar Tonalidad
         </button>
         <button id="suggestSubstitutionsBtn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
-            Sugerir Sustituciones de Acordes ✨
+            Sugerir Sustituciones de Acordes
         </button>
         <button id="generateSongIdeasBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
-            Generar Ideas para Canciones ✨
+            Generar Ideas para Canciones
         </button>
     </div>
 
@@ -297,7 +279,6 @@
             <span class="close-button">&times;</span>
             <h2 id="modalTitle" class="text-xl font-bold mb-4 text-gray-800"></h2>
             <div id="modalBody" class="text-gray-700">
-                <div id="loadingSpinner" class="loading-spinner"></div>
                 <p id="llmResponseText"></p>
             </div>
         </div>
@@ -305,7 +286,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Selecciona todos los segmentos de notas en ambos círculos
             const noteSegments = document.querySelectorAll('.note-segment');
             const generateProgressionBtn = document.getElementById('generateProgressionBtn');
             const explainKeyBtn = document.getElementById('explainKeyBtn');
@@ -315,38 +295,64 @@
             const closeButton = document.querySelector('.close-button');
             const modalTitle = document.getElementById('modalTitle');
             const llmResponseText = document.getElementById('llmResponseText');
-            const loadingSpinner = document.getElementById('loadingSpinner');
 
-            let currentSelectedNote = null; // Variable para almacenar la nota seleccionada
+            let currentSelectedNote = null;
 
-            // Define las relaciones entre las tonalidades mayores y sus acordes diatónicos (mayores y menores)
-            // y la tonalidad menor relativa.
-            const tonalidades = {
-                'C': { major: ['C', 'F', 'G'], minor: ['Am', 'Dm', 'Em'] },
-                'G': { major: ['G', 'C', 'D'], minor: ['Em', 'Am', 'Bm'] },
-                'D': { major: ['D', 'G', 'A'], minor: ['Bm', 'Em', 'F#m'] },
-                'A': { major: ['A', 'D', 'E'], minor: ['F#m', 'Bm', 'C#m'] },
-                'E': { major: ['E', 'A', 'B'], minor: ['C#m', 'F#m', 'G#m'] },
-                'B': { major: ['B', 'E', 'F#'], minor: ['G#m', 'C#m', 'Ebm'] },
-                'F#': { major: ['F#', 'B', 'C#'], minor: ['Ebm', 'G#m', 'Bbm'] },
-                'Db': { major: ['Db', 'Gb', 'Ab'], minor: ['Bbm', 'Ebm', 'Fm'] },
-                'Ab': { major: ['Ab', 'Db', 'Eb'], minor: ['Fm', 'Bbm', 'Cm'] },
-                'Eb': { major: ['Eb', 'Ab', 'Bb'], minor: ['Cm', 'Fm', 'Gm'] },
-                'Bb': { major: ['Bb', 'Eb', 'F'], minor: ['Gm', 'Cm', 'Dm'] },
-                'F': { major: ['F', 'Bb', 'C'], minor: ['Dm', 'Gm', 'Am'] },
+            // --- Datos predefinidos para las respuestas ---
+            const predefinedResponses = {
+                "C": {
+                    "progression": "Una progresión clásica en Do Mayor es **C - G - Am - F** (I - V - vi - IV). Transmite un sentimiento alegre y familiar.",
+                    "explanation": "La tonalidad de Do Mayor (C) no tiene sostenidos ni bemoles en su armadura de clave. Sus acordes principales son C (Do Mayor), F (Fa Mayor) y G (Sol Mayor). Es una tonalidad brillante y muy común.",
+                    "substitutions": "Para C mayor: Gsus4 puede sustituir a G. Am7 para C. Cmaj7 para un sonido más suave.",
+                    "songIdeas": "1. Una balada alegre sobre el primer amor. 2. Una canción infantil con un coro pegadizo. 3. Un himno de gratitud y esperanza."
+                },
+                "G": {
+                    "progression": "Una progresión popular en Sol Mayor es **G - D - Em - C** (I - V - vi - IV). Es una progresión muy usada en folk y rock.",
+                    "explanation": "La tonalidad de Sol Mayor (G) tiene un sostenido (F#) en su armadura de clave. Sus acordes principales son G (Sol Mayor), C (Do Mayor) y D (Re Mayor). Es una tonalidad cálida y versátil.",
+                    "substitutions": "Para G mayor: Cadd9 puede sustituir a C. Dsus4 a D. Bm7 para Em.",
+                    "songIdeas": "1. Un tema aventurero sobre un viaje por carretera. 2. Una canción campestre sobre la naturaleza. 3. Un himno optimista de superación."
+                },
+                "Am": {
+                    "progression": "Una progresión común en La Menor es **Am - G - C - F** (i - VII - III - VI). Tiene un sentimiento melancólico pero con resolución.",
+                    "explanation": "La tonalidad de La Menor (Am) es la relativa menor de Do Mayor. No tiene sostenidos ni bemoles. Sus acordes principales son Am (La Menor), Dm (Re Menor) y Em (Mi Menor) o E Mayor (V armónico).",
+                    "substitutions": "Para Am menor: Dsus2 puede sustituir a Dm. Em7 para Am. Gmaj7 para un sonido más sofisticado.",
+                    "songIdeas": "1. Una historia de desamor en la noche. 2. Un cuento gótico sobre un viejo misterio. 3. Un lamento por tiempos perdidos."
+                },
+                // --- Puedes añadir más notas y sus respuestas aquí ---
+                // "D": {
+                //     "progression": "...",
+                //     "explanation": "...",
+                //     "substitutions": "...",
+                //     "songIdeas": "..."
+                // },
+                // "Dm": {
+                //     "progression": "...",
+                //     "explanation": "...",
+                //     "substitutions": "...",
+                //     "songIdeas": "..."
+                // }
+                // --- Fin de datos predefinidos ---
             };
 
-            // Define el mapeo de las tonalidades menores a sus tonalidades mayores relativas.
-            const relativeMajors = {
-                'Am': 'C', 'Em': 'G', 'Bm': 'D', 'F#m': 'A', 'C#m': 'E', 'G#m': 'B',
-                'Ebm': 'F#', 'Bbm': 'Db', 'Fm': 'Ab', 'Cm': 'Eb', 'Gm': 'Bb', 'Dm': 'F',
-            };
+            // Función para obtener y mostrar la respuesta predefinida
+            function getPredefinedResponse(note, type) {
+                if (predefinedResponses[note] && predefinedResponses[note][type]) {
+                    showModal(
+                        `${type === 'progression' ? 'Progresión de Acordes' :
+                           type === 'explanation' ? 'Explicación de la Tonalidad' :
+                           type === 'substitutions' ? 'Sugerencias de Sustituciones' :
+                           'Ideas para Canciones'} para ${note}`,
+                        predefinedResponses[note][type]
+                    );
+                } else {
+                    showModal("Información no disponible", `No hay información predefinida para ${type} en la tonalidad de ${note}.`);
+                }
+            }
 
-            // Función para mostrar el modal con el contenido
+            // Función para mostrar el modal
             function showModal(title, content) {
                 modalTitle.textContent = title;
                 llmResponseText.innerHTML = content;
-                loadingSpinner.style.display = 'none';
                 llmResponseModal.style.display = 'flex';
             }
 
@@ -357,7 +363,6 @@
                 modalTitle.textContent = '';
             }
 
-            // Event listener para cerrar el modal
             closeButton.addEventListener('click', hideModal);
             window.addEventListener('click', (event) => {
                 if (event.target == llmResponseModal) {
@@ -365,7 +370,6 @@
                 }
             });
 
-            // Añade un 'event listener' de clic a cada segmento de nota
             noteSegments.forEach(segment => {
                 segment.addEventListener('click', () => {
                     const selectedNote = segment.dataset.note;
@@ -374,7 +378,6 @@
                     noteSegments.forEach(s => s.classList.remove('highlighted'));
 
                     let notesToHighlight = new Set();
-
                     if (tonalidades[selectedNote]) {
                         const currentTonalidadData = tonalidades[selectedNote];
                         notesToHighlight.add(selectedNote);
@@ -400,93 +403,34 @@
                 });
             });
 
-            // Función para llamar a la API de Gemini
-            async function callGeminiAPI(prompt, title) {
-                if (!currentSelectedNote) {
-                    showModal("Error", "Por favor, selecciona una nota en el círculo primero.");
-                    return;
-                }
-
-                modalTitle.textContent = title;
-                llmResponseText.textContent = '';
-                loadingSpinner.style.display = 'block';
-                llmResponseModal.style.display = 'flex';
-
-                let chatHistory = [];
-                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-                const payload = { contents: chatHistory };
-                const apiKey = ""; // La clave API será proporcionada por el entorno de Canvas
-
-                try {
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    // Verificar si la respuesta HTTP fue exitosa
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        console.error("Error HTTP al llamar a la API de Gemini:", response.status, response.statusText, errorData);
-                        llmResponseText.textContent = `Error del servidor: ${response.status} ${response.statusText}. Detalles: ${errorData.error ? errorData.error.message : 'No hay detalles.'}`;
-                        return;
-                    }
-
-                    const result = await response.json();
-
-                    if (result.candidates && result.candidates.length > 0 &&
-                        result.candidates[0].content && result.candidates[0].content.parts &&
-                        result.candidates[0].content.parts.length > 0) {
-                        const text = result.candidates[0].content.parts[0].text;
-                        llmResponseText.innerHTML = text;
-                    } else {
-                        llmResponseText.textContent = "No se pudo obtener una respuesta válida del modelo. La estructura de la respuesta fue inesperada.";
-                        console.error("Respuesta inesperada del LLM:", result);
-                    }
-                } catch (error) {
-                    llmResponseText.textContent = `Error al conectar con el modelo: ${error.message}. Por favor, verifica tu conexión a internet o intenta de nuevo más tarde.`;
-                    console.error("Error al llamar a la API de Gemini:", error);
-                } finally {
-                    loadingSpinner.style.display = 'none';
-                }
-            }
-
-            // Event listener para el botón de generar progresión
+            // Modificación de los Event Listeners para usar datos predefinidos
             generateProgressionBtn.addEventListener('click', () => {
                 if (currentSelectedNote) {
-                    const prompt = `Genera una progresión de acordes común y musicalmente interesante para la tonalidad de ${currentSelectedNote}. Proporciona los acordes en notación de letras (C, G, Am, F) y una breve descripción de su sentimiento.`;
-                    callGeminiAPI(prompt, `Progresión de Acordes para ${currentSelectedNote}`);
+                    getPredefinedResponse(currentSelectedNote, 'progression');
                 } else {
                     showModal("Error", "Por favor, selecciona una nota en el círculo para generar una progresión.");
                 }
             });
 
-            // Event listener para el botón de explicar tonalidad
             explainKeyBtn.addEventListener('click', () => {
                 if (currentSelectedNote) {
-                    const prompt = `Explica brevemente la tonalidad de ${currentSelectedNote} en términos de teoría musical, incluyendo su armadura de clave y algunos de sus acordes principales.`;
-                    callGeminiAPI(prompt, `Explicación de la Tonalidad de ${currentSelectedNote}`);
+                    getPredefinedResponse(currentSelectedNote, 'explanation');
                 } else {
                     showModal("Error", "Por favor, selecciona una nota en el círculo para obtener una explicación.");
                 }
             });
 
-            // Event listener para el botón de sugerir sustituciones de acordes
             suggestSubstitutionsBtn.addEventListener('click', () => {
                 if (currentSelectedNote) {
-                    const prompt = `Para la tonalidad de ${currentSelectedNote}, sugiere algunas sustituciones de acordes comunes y creativas. Explica brevemente por qué funcionan.`;
-                    callGeminiAPI(prompt, `Sugerencias de Sustituciones de Acordes para ${currentSelectedNote}`);
+                    getPredefinedResponse(currentSelectedNote, 'substitutions');
                 } else {
                     showModal("Error", "Por favor, selecciona una nota en el círculo para obtener sugerencias de sustituciones.");
                 }
             });
 
-            // Event listener para el botón de generar ideas para canciones
             generateSongIdeasBtn.addEventListener('click', () => {
                 if (currentSelectedNote) {
-                    const prompt = `Para la tonalidad de ${currentSelectedNote}, genera 3-5 ideas de temas o ambientes para una canción. Describe brevemente el sentimiento o la historia que cada idea evoca.`;
-                    callGeminiAPI(prompt, `Ideas para Canciones en ${currentSelectedNote}`);
+                    getPredefinedResponse(currentSelectedNote, 'songIdeas');
                 } else {
                     showModal("Error", "Por favor, selecciona una nota en el círculo para generar ideas para canciones.");
                 }
@@ -495,3 +439,4 @@
     </script>
 </body>
 </html>
+
