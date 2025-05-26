@@ -234,7 +234,7 @@
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
-            100% { transform = rotate(360deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -284,6 +284,12 @@
         <button id="explainKeyBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
             Explicar Tonalidad ✨
         </button>
+        <button id="suggestSubstitutionsBtn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+            Sugerir Sustituciones de Acordes ✨
+        </button>
+        <button id="generateSongIdeasBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+            Generar Ideas para Canciones ✨
+        </button>
     </div>
 
     <div id="llmResponseModal" class="modal">
@@ -303,6 +309,8 @@
             const noteSegments = document.querySelectorAll('.note-segment');
             const generateProgressionBtn = document.getElementById('generateProgressionBtn');
             const explainKeyBtn = document.getElementById('explainKeyBtn');
+            const suggestSubstitutionsBtn = document.getElementById('suggestSubstitutionsBtn'); // Nuevo botón
+            const generateSongIdeasBtn = document.getElementById('generateSongIdeasBtn');       // Nuevo botón
             const llmResponseModal = document.getElementById('llmResponseModal');
             const closeButton = document.querySelector('.close-button');
             const modalTitle = document.getElementById('modalTitle');
@@ -475,7 +483,28 @@
                     showModal("Error", "Por favor, selecciona una nota en el círculo para obtener una explicación.");
                 }
             });
+
+            // Nuevo: Event listener para el botón de sugerir sustituciones de acordes
+            suggestSubstitutionsBtn.addEventListener('click', () => {
+                if (currentSelectedNote) {
+                    const prompt = `Para la tonalidad de ${currentSelectedNote}, sugiere algunas sustituciones de acordes comunes y creativas. Explica brevemente por qué funcionan.`;
+                    callGeminiAPI(prompt, `Sugerencias de Sustituciones de Acordes para ${currentSelectedNote}`);
+                } else {
+                    showModal("Error", "Por favor, selecciona una nota en el círculo para obtener sugerencias de sustituciones.");
+                }
+            });
+
+            // Nuevo: Event listener para el botón de generar ideas para canciones
+            generateSongIdeasBtn.addEventListener('click', () => {
+                if (currentSelectedNote) {
+                    const prompt = `Para la tonalidad de ${currentSelectedNote}, genera 3-5 ideas de temas o ambientes para una canción. Describe brevemente el sentimiento o la historia que cada idea evoca.`;
+                    callGeminiAPI(prompt, `Ideas para Canciones en ${currentSelectedNote}`);
+                } else {
+                    showModal("Error", "Por favor, selecciona una nota en el círculo para generar ideas para canciones.");
+                }
+            });
         });
     </script>
 </body>
 </html>
+
